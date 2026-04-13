@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortuna | Netgear Insight Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .amazon-link {
+            background: #fbbf24;
+            color: #000;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .amazon-link:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+
+<body class="selection:bg-blue-500/30">
+
+    <!-- Sticky Nav -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-t-0 border-x-0">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600 rounded-lg">
+                    <i class="fas fa-microchip text-white"></i>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tight uppercase">Fortuna <span
+                        class="text-blue-500 font-light">Network</span></h1>
+            </div>
+            <div class="hidden lg:flex gap-8 text-sm font-semibold text-slate-400">
+                <a href="#upgrade-solution" class="hover:text-white transition">Upgrade Solution</a>
+                <a href="#bernard-guide" class="hover:text-white transition">RJ45 Guide</a>
+            </div>
+            <a href="#upgrade-solution"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-lg shadow-blue-900/20">
+                View Solution
+            </a>
+        </div>
+    </nav>
+
+    <!-- UPGRADE SOLUTION: TP-Link Omada ER7212PC -->
+    <section id="upgrade-solution" class="pt-24 pb-8 px-6 max-w-7xl mx-auto">
+        <div class="glass-panel p-8 rounded-3xl mb-8 border-2 border-green-500/50 bg-gradient-to-br from-slate-900 to-slate-800">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-sm font-bold mb-6">
+                <i class="fas fa-arrow-up"></i> RECOMMENDED UPGRADE PATH
+            </div>
+            
+            <h2 class="text-4xl md:text-5xl font-black mb-4 leading-tight">Upgrade Your <span class="text-green-400">Omada Network</span></h2>
+            <p class="text-slate-300 text-lg mb-8 max-w-3xl">
+                Already have Omada access points? Upgrade to the <strong>ER7212PC 3-in-1 Gateway</strong> and keep all 8 existing APs. 
+                This router replaces your ER7206 + switch + controller with one device.
+            </p>
+
+            <!-- Upgrade Topology Diagram -->
+            <div class="bg-slate-950/80 p-6 rounded-2xl mb-8 overflow-x-auto">
+                <h3 class="text-xl font-bold text-blue-400 mb-4"><i class="fas fa-project-diagram mr-2"></i>Current vs. Upgraded Topology</h3>
+                <div class="mermaid text-sm">
+graph TB
+    subgraph "CURRENT SETUP"
+    STAR[Starlink] --> RTR1[ER7206 Router]
+    RTR1 --> SW1[Separate PoE Switch]
+    SW1 --> AP1[Existing AP 1]
+    SW1 --> AP2[Existing AP 2]
+    SW1 --> AP3[Existing AP 3]
+    SW1 --> AP4[Existing AP 4]
+    SW1 --> AP5[Existing AP 5]
+    SW1 --> AP6[Existing AP 6]
+    SW1 --> AP7[Existing AP 7]
+    SW1 --> AP8[Existing AP 8]
+    CTRL[Separate Controller] -.-> RTR1
+    end
+    
+    subgraph "UPGRADED SETUP"
+    STAR2[Starlink] --> RTR2[ER7212PC 3-in-1 Gateway]
+    RTR2 --> APA[Existing AP 1]
+    RTR2 --> APB[Existing AP 2]
+    RTR2 --> APC[Existing AP 3]
+    RTR2 --> APD[Existing AP 4]
+    RTR2 --> APE[Existing AP 5]
+    RTR2 --> APF[Existing AP 6]
+    RTR2 --> APG[Existing AP 7]
+    RTR2 --> APH[Existing AP 8]
+    end
+    
+    style RTR2 fill:#10b981,stroke:#059669,stroke-width:3px
+    style SW1 fill:#ef4444,stroke:#dc2626,stroke-width:2px
+    style CTRL fill:#ef4444,stroke:#dc2626,stroke-width:2px
+                </div>
+            </div>
+
+            <!-- What You Gain -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-green-500/20">
+                    <div class="text-3xl text-green-400 mb-3"><i class="fas fa-layer-group"></i></div>
+                    <h4 class="font-bold text-lg mb-2">3-in-1 Integration</h4>
+                    <ul class="text-sm text-slate-400 space-y-2">
+                        <li>✓ Router + Switch + Controller combined</li>
+                        <li>✓ 8 PoE+ ports (110W budget)</li>
+                        <li>✓ Manages up to 10 APs</li>
+                        <li>✓ Eliminates separate devices</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-blue-500/20">
+                    <div class="text-3xl text-blue-400 mb-3"><i class="fas fa-wifi"></i></div>
+                    <h4 class="font-bold text-lg mb-2">Keep Existing APs</h4>
+                    <ul class="text-sm text-slate-400 space-y-2">
+                        <li>✓ All 8 "hockey pucks" compatible</li>
+                        <li>✓ Auto-adoption via Omada SDN</li>
+                        <li>✓ Same SSIDs and settings</li>
+                        <li>✓ Zero-touch provisioning</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-purple-500/20">
+                    <div class="text-3xl text-purple-400 mb-3"><i class="fas fa-dollar-sign"></i></div>
+                    <h4 class="font-bold text-lg mb-2">Cost Savings</h4>
+                    <ul class="text-sm text-slate-400 space-y-2">
+                        <li>✓ One device vs. three</li>
+                        <li>✓ Less rack space needed</li>
+                        <li>✓ Lower power consumption</li>
+                        <li>✓ Fanless silent operation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ER7212PC Product Card -->
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 mb-8">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold mb-2">TP-Link Omada ER7212PC</h3>
+                        <p class="text-green-400 font-bold text-lg mb-4">3-in-1 Gigabit VPN Gateway</p>
+                        
+                        <!-- Management Highlight Box -->
+                        <div class="bg-green-900/30 border border-green-500/50 p-4 rounded-lg mb-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                                <h4 class="font-bold text-green-400 text-lg">100% Fully Managed - Better Than ER7206</h4>
+                            </div>
+                            <p class="text-sm text-slate-300 mb-3">
+                                Unlike the ER7206 which requires a <strong>separate controller</strong>, the ER7212PC has the <strong>controller built-in</strong>. 
+                                Manage everything from one device through the Omada app or cloud dashboard.
+                            </p>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-cloud text-blue-400"></i>
+                                    <span>Cloud Access & Omada App</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-bolt text-yellow-400"></i>
+                                    <span>Zero-Touch Provisioning (ZTP)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-network-wired text-purple-400"></i>
+                                    <span>Centralized Management</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-mobile-alt text-green-400"></i>
+                                    <span>Remote Control Anywhere</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <div class="text-xs text-slate-500">PoE Ports</div>
+                                <div class="text-lg font-bold text-white">8x PoE+</div>
+                                <div class="text-xs text-green-400">110W Total Budget</div>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <div class="text-xs text-slate-500">Max APs</div>
+                                <div class="text-lg font-bold text-white">10 Devices</div>
+                                <div class="text-xs text-blue-400">Built-in Controller</div>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <div class="text-xs text-slate-500">WAN Ports</div>
+                                <div class="text-lg font-bold text-white">4x Gigabit</div>
+                                <div class="text-xs text-slate-400">2x SFP + 2x RJ45</div>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <div class="text-xs text-slate-500">Noise Level</div>
+                                <div class="text-lg font-bold text-white">Fanless</div>
+                                <div class="text-xs text-slate-400">Silent Operation</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <a href="https://www.amazon.com/TP-Link-ER7212PC-Controller-Installation-Protection/dp/B0BMSJRNJG" target="_blank" class="amazon-link w-full text-center block py-3 rounded-lg font-bold transition">
+                                <i class="fab fa-amazon mr-2"></i> View on Amazon - $279.99
+                            </a>
+                            <a href="https://www.microcenter.com/product/693917/tp-link-er7212pc-omada-3-in-1-gigabit-vpn-router" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white w-full text-center block py-3 rounded-lg font-bold transition">
+                                <i class="fas fa-store mr-2"></i> Micro Center - $279.99
+                            </a>
+                            <a href="https://www.pcnation.com/tp-link-er7212pc-09tm32" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white w-full text-center block py-3 rounded-lg font-bold transition">
+                                <i class="fas fa-shopping-cart mr-2"></i> PCNation - $249.99 (Best Price)
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/3 bg-slate-900/50 p-6 rounded-xl">
+                        <h4 class="font-bold text-lg mb-4 text-yellow-400"><i class="fas fa-lightbulb mr-2"></i>Best For:</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-400 mt-1"></i>
+                                <span>Already have 6-10 Omada APs</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-400 mt-1"></i>
+                                <span>Want to eliminate separate switch</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-400 mt-1"></i>
+                                <span>Need quieter operation (fanless)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-400 mt-1"></i>
+                                <span>Want simplified management</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-400 mt-1"></i>
+                                <span>Single device = single point of failure eliminated</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ER7212PC ASCII Diagram -->
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-6">
+                <h3 class="text-xl font-bold text-blue-400 mb-3">ER7212PC + 6× BE5000 APs Diagram</h3>
+                <pre class="text-xs text-slate-200 bg-black p-4 rounded overflow-x-auto">┌─────────────────┐
+│   ISP MODEM     │
+│   (ONT/Modem)   │
+└────────┬────────┘
+         │ WAN Cable
+         ▼
+┌─────────────────────────────┐
+│      ER7212PC Router        │
+│  ┌───────────────────────┐  │
+│  │   2 SFP WAN Ports     │  │ ← Can connect to fiber/ethernet
+│  │   1 Gigabit WAN Port  │  │ ← Primary WAN connection
+│  │   1 Gigabit LAN/WAN   │  │
+│  └───────────────────────┘  │
+│  ┌───────────────────────┐  │
+│  │ 8× PoE+ LAN Ports     │  │ ← BE5000 APs connect here
+│  │ (Ports 1-8, 30W each) │  │ ← 110W total budget
+│  └───────────────────────┘  │
+│  Built-in Omada Controller  │
+└───────┬─┬─┬─┬─┬─┬─┬─┬───────┘
+        │ │ │ │ │ │ │ │
+        ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼
+   ┌───────────────────────┐
+   │   6× BE5000 Access   │
+   │      Points          │
+   │   (WiFi 7 - 802.11be)│
+   ├───────┬───────┬───────┤
+   │ BE5000│ BE5000│ BE5000│
+   │  AP1  │  AP2  │  AP3  │
+   ├───────┼───────┼───────┤
+   │ BE5000│ BE5000│ BE5000│
+   │  AP4  │  AP5  │  AP6  │
+   └───────┴───────┴───────┘
+         (Up to 10 EAPs supported)</pre>
+            </div>
+
+            <!-- BE5000 Access Point Specifications -->
+            <div class="bg-gradient-to-br from-blue-900/30 to-slate-900/50 p-6 rounded-xl border border-blue-500/30 mb-6">
+                <h3 class="text-2xl font-bold text-blue-400 mb-4">TP-Link Omada EAP723 - BE5000 WiFi 7 Access Point</h3>
+                <p class="text-slate-300 mb-6">The BE5000 is our chosen WiFi 7 access point for high-performance residential deployment.</p>
+
+                <!-- BE5000 Specs Grid -->
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-slate-900/60 p-4 rounded-lg">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-wifi text-green-400 text-xl"></i>
+                            <h4 class="font-bold text-white">WiFi 7 (802.11be)</h4>
+                        </div>
+                        <ul class="text-sm text-slate-400 space-y-1">
+                            <li>• 6 GHz: 2880 Mbps</li>
+                            <li>• 5 GHz: 1440 Mbps</li>
+                            <li>• 2.4 GHz: 688 Mbps</li>
+                            <li>• <strong>Total: 5008 Mbps</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-lg">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-ethernet text-blue-400 text-xl"></i>
+                            <h4 class="font-bold text-white">1× 2.5G PoE+ Port</h4>
+                        </div>
+                        <ul class="text-sm text-slate-400 space-y-1">
+                            <li>• 2.5G Multi-Gigabit</li>
+                            <li>• 802.3at PoE+ powered</li>
+                            <li>• Up to 30W per port</li>
+                            <li>• DC power option available</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-lg">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-users text-purple-400 text-xl"></i>
+                            <h4 class="font-bold text-white">High Capacity</h4>
+                        </div>
+                        <ul class="text-sm text-slate-400 space-y-1">
+                            <li>• 100+ simultaneous clients</li>
+                            <li>• MU-MIMO + OFDMA</li>
+                            <li>• Seamless roaming (802.11k/v)</li>
+                            <li>• Band steering</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Configuration Guide -->
+                <div class="bg-slate-900/40 p-5 rounded-lg mb-4">
+                    <h4 class="font-bold text-yellow-400 mb-3"><i class="fas fa-cog mr-2"></i>Configuration Steps</h4>
+                    <ol class="text-sm text-slate-300 space-y-2 list-decimal list-inside">
+                        <li>Connect BE5000 to ER7212PC PoE+ port (Port 1-8)</li>
+                        <li>Power is delivered automatically over Ethernet</li>
+                        <li>Download <strong>Omada app</strong> (iOS/Android) or use web portal</li>
+                        <li>ER7212PC auto-discovers APs (ZTP - Zero Touch Provisioning)</li>
+                        <li>Create SSIDs: "Fortuna_Main" (6GHz + 5GHz) and "Fortuna_Guest" (2.4GHz)</li>
+                        <li>Enable band steering and fast roaming (802.11r)</li>
+                        <li>Set transmit power to 70% for optimal coverage</li>
+                        <li>Schedule reboot weekly (Sunday 3AM)</li>
+                    </ol>
+                </div>
+
+                <!-- Best Practices -->
+                <div class="bg-green-900/20 border border-green-500/30 p-4 rounded-lg">
+                    <h4 class="font-bold text-green-400 mb-2"><i class="fas fa-lightbulb mr-2"></i>Installation Best Practices</h4>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
+                        <ul class="space-y-1">
+                            <li>✓ Mount on ceiling, 8-12 feet high</li>
+                            <li>✓ Position for line-of-sight to main areas</li>
+                            <li>✓ Keep away from metal ducts and mirrors</li>
+                        </ul>
+                        <ul class="space-y-1">
+                            <li>✓ Maximum 3 APs per controller zone</li>
+                            <li>✓ Enable mesh if running cables is difficult</li>
+                            <li>✓ Use 6GHz for high-speed devices (gaming, 4K/8K)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Purchase Links -->
+                <div class="mt-4 pt-4 border-t border-slate-700">
+                    <p class="text-sm text-slate-400 mb-2">Purchase BE5000 APs:</p>
+                    <div class="flex gap-3">
+                        <a href="https://www.newegg.com/p/0XP-001U-009B8" target="_blank" class="amazon-link px-6 py-2 rounded-lg font-bold text-sm">
+                            <i class="fas fa-shopping-cart mr-2"></i>Newegg - $162.99
+                        </a>
+                        <a href="https://www.amazon.com/TP-Link-Omada-Wireless-Dual-Band-Integrated/dp/B0CTL1Y9YR" target="_blank" class="amazon-link px-6 py-2 rounded-lg font-bold text-sm">
+                            <i class="fab fa-amazon mr-2"></i>Amazon
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Upgrade Options -->
+            <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Standard Room Upgrade -->
+                    <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-bed text-blue-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Standard Room Upgrade</h4>
+                                <p class="text-sm text-slate-400">Bedrooms, Offices, Guest Rooms</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg mb-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-bold">Omada EAP653</span>
+                                <span class="text-green-400 font-bold">AX3000 WiFi 6</span>
+                            </div>
+                            <ul class="text-sm text-slate-400 space-y-1 mb-3">
+                                <li>• 2.4GHz: 574 Mbps + 5GHz: 2402 Mbps</li>
+                                <li>• Ceiling or wall mount</li>
+                                <li>• PoE powered</li>
+                            </ul>
+                            <div class="flex gap-2">
+                                <a href="https://www.amazon.com/TP-Link-EAP653-UR-Wireless-Gigabite/dp/B0DCWNFNRW" target="_blank" class="amazon-link px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Amazon
+                                </a>
+                                <a href="https://www.microcenter.com/product/693927/tp-link-omada-eap653-ax3000-wifi-6-tri-band-gigabit-wireless-router-with-omada-mesh-support" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Micro Center
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-slate-500">
+                            <strong>Replaces:</strong> Older EAP225, EAP245, EAP615-Wall<br>
+                            <strong>Improvement:</strong> 2x faster speeds, better range
+                        </div>
+                    </div>
+
+                    <!-- Premium Room Upgrade -->
+                    <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tv text-purple-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Premium Room Upgrade</h4>
+                                <p class="text-sm text-slate-400">Living Room, Media Room, Master Suite</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg mb-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-bold">Omada EAP670</span>
+                                <span class="text-purple-400 font-bold">AX5400 WiFi 6</span>
+                            </div>
+                            <ul class="text-sm text-slate-400 space-y-1 mb-3">
+                                <li>• 2.4GHz: 574 Mbps + 5GHz: 4804 Mbps</li>
+                                <li>• 4x4 MU-MIMO for high density</li>
+                                <li>• 2.5Gbps PoE+ uplink</li>
+                            </ul>
+                            <div class="flex gap-2">
+                                <a href="https://www.amazon.com/TP-Link-EAP670-Wireless-Seamless-Integrated/dp/B09ZV19DBP" target="_blank" class="amazon-link px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Amazon
+                                </a>
+                                <a href="https://www.microcenter.com/product/693954/tp-link-eap670-v2-ax5400-wifi-6-dual-band-wireless-access-point" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Micro Center
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-slate-500">
+                            <strong>Replaces:</strong> EAP245, EAP265 HD, EAP620 HD<br>
+                            <strong>Improvement:</strong> 4x faster, better for 4K streaming
+                        </div>
+                    </div>
+
+                    <!-- Outdoor Upgrade -->
+                    <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-sun text-green-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Outdoor Upgrade</h4>
+                                <p class="text-sm text-slate-400">Patio, Pool, Garden Areas</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg mb-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-bold">Omada EAP650-Outdoor</span>
+                                <span class="text-green-400 font-bold">AX3000 WiFi 6</span>
+                            </div>
+                            <ul class="text-sm text-slate-400 space-y-1 mb-3">
+                                <li>• IP67 weatherproof rating</li>
+                                <li>• Wall or pole mount</li>
+                                <li>• -30°C to 70°C operating range</li>
+                            </ul>
+                            <div class="flex gap-2">
+                                <a href="https://www.amazon.com/Exterior-TP-LINK-OMADA-EAP650-OUTDOOR-AX3000/dp/B0BJ2BQJD1" target="_blank" class="amazon-link px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Amazon
+                                </a>
+                                <a href="https://www.microcenter.com/product/693961/tp-link-eap650-outdoor-omada-true-wifi6-ax3000-gigabit-outdoor-access-point-mesh" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Micro Center
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-slate-500">
+                            <strong>Replaces:</strong> EAP225-Outdoor, EAP110-Outdoor<br>
+                            <strong>Improvement:</strong> Weatherproof, mesh support
+                        </div>
+                    </div>
+
+                    <!-- High-Density Upgrade -->
+                    <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-yellow-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">High-Density Upgrade</h4>
+                                <p class="text-sm text-slate-400">Events, Game Room, Common Areas</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg mb-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-bold">Omada EAP690E HD</span>
+                                <span class="text-yellow-400 font-bold">AXE11000 WiFi 6E</span>
+                            </div>
+                            <ul class="text-sm text-slate-400 space-y-1 mb-3">
+                                <li>• Tri-band: 2.4/5/6 GHz</li>
+                                <li>• 250+ concurrent clients</li>
+                                <li>• 10Gbps Ethernet port</li>
+                            </ul>
+                            <div class="flex gap-2">
+                                <a href="https://www.amazon.com/TP-Link-EAP690E-HD-AXE11000-Environments/dp/B0C448VPC1" target="_blank" class="amazon-link px-4 py-2 rounded text-sm font-bold flex-1 text-center">
+                                    Amazon
+                                </a>
+                                <span class="bg-slate-800 text-slate-500 px-4 py-2 rounded text-sm flex-1 text-center">
+                                    Premium Option
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-slate-500">
+                            <strong>Best For:</strong> 100+ devices, 4K streaming<br>
+                            <strong>Improvement:</strong> 6GHz band, enterprise-grade
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="mt-8 p-6 bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-xl border border-green-500/30">
+                <h4 class="font-bold text-lg mb-3 text-green-400"><i class="fas fa-calculator mr-2"></i>Upgrade Math</h4>
+                <div class="grid md:grid-cols-3 gap-6 text-sm">
+                    <div>
+                        <strong class="text-white">Current Setup:</strong>
+                        <ul class="text-slate-400 mt-2 space-y-1">
+                            <li>• ER7206 Router: ~$180</li>
+                            <li>• 24-port PoE Switch: ~$350</li>
+                            <li>• OC200 Controller: ~$80</li>
+                            <li class="text-red-400 font-bold">Total: ~$610</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong class="text-white">Upgraded Setup:</strong>
+                        <ul class="text-slate-400 mt-2 space-y-1">
+                            <li>• ER7212PC 3-in-1: $249-279</li>
+                            <li>• Keep all 8 existing APs</li>
+                            <li>• No controller needed</li>
+                            <li class="text-green-400 font-bold">Total: $249-279</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong class="text-white">You Save:</strong>
+                        <ul class="text-slate-400 mt-2 space-y-1">
+                            <li>• <span class="text-green-400 font-bold">$330-360</span> upfront</li>
+                            <li>• Less rack space</li>
+                            <li>• Lower power bill</li>
+                            <li>• Simpler management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bernard's RJ45 Termination Guide -->
+    <section id="bernard-guide" class="scroll-mt-24 py-12 max-w-7xl mx-auto px-6">
+        <div class="glass-panel p-8 rounded-3xl border-2 border-yellow-500/50 bg-gradient-to-br from-slate-900 to-slate-800">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-video text-yellow-400 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-yellow-400">Bernard - This Is What You Need To Do</h3>
+                    <p class="text-sm text-slate-400">RJ45 Cable Termination Instructions</p>
+                </div>
+            </div>
+            
+            <p class="text-slate-300 mb-6">
+                You have two RJ45 connectors that need to be spliced onto the cables. This video shows exactly how to terminate the cable ends correctly. Follow these steps carefully to ensure proper wire order and secure connections.
+            </p>
+
+            <!-- YouTube Video Embed -->
+            <div class="aspect-video w-full mb-8 rounded-xl overflow-hidden bg-black">
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/N1dcCzfgdhs" 
+                    title="How to CRIMP CAT6 RJ45 - Tutorial (BEST Method)" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- Wire Order Reference -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-slate-900/60 p-6 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-green-400 mb-4"><i class="fas fa-list-ol mr-2"></i>T568B Wire Order (Standard)</h4>
+                    <p class="text-sm text-slate-400 mb-3">Arrange wires in this order from left to right (with clip facing down):</p>
+                    <ol class="text-sm text-slate-300 space-y-2 list-decimal list-inside">
+                        <li><span class="text-orange-400">Orange/White</span></li>
+                        <li><span class="text-orange-500">Orange</span></li>
+                        <li><span class="text-green-400">Green/White</span></li>
+                        <li><span class="text-blue-500">Blue</span></li>
+                        <li><span class="text-blue-400">Blue/White</span></li>
+                        <li><span class="text-green-500">Green</span></li>
+                        <li><span class="text-amber-600">Brown/White</span></li>
+                        <li><span class="text-amber-700">Brown</span></li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-900/60 p-6 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-yellow-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>Key Steps</h4>
+                    <ul class="text-sm text-slate-300 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Strip only 1-1.5 inches of outer jacket</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Untwist wires and straighten them completely</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Keep wires flat and in correct T568B order</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Trim wire ends evenly with sharp cutters</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Push wires all the way to the front of the connector</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>Crimp firmly - you'll hear a click</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                <p class="text-sm text-yellow-200">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    <strong>Pro Tip:</strong> Use a cable tester after crimping to verify all 8 pins are connected properly. If one wire isn't making contact, you'll need to cut and re-do the connector.
+                </p>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

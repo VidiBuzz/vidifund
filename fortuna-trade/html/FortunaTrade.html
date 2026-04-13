@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai FortunaTrade | Agentic Swarm Blueprint</title>
+    <style>
+        /* CSS Reset & Variable Definitions */
+        :root {
+            --bg-deep: #000000;
+            --bg-card: #0a0a0a;
+            --accent-primary: #00f2ff; /* Cyan Neon */
+            --accent-secondary: #7000ff; /* Purple Neon */
+            --text-high: #ffffff;
+            --text-med: #dddddd;
+            --text-low: #888888;
+            --border: #222222;
+            --danger: #ff4b4b;
+            --success: #00ff88;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-high);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Video Header Section */
+        .video-hero {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 2px solid var(--accent-secondary);
+        }
+
+        .video-container {
+            width: 80%;
+            max-width: 1000px;
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 0 50px rgba(112, 0, 255, 0.4);
+            border: 1px solid var(--border);
+            background: #111;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        header.title-section {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        h1 {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            letter-spacing: -3px;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--text-med);
+            max-width: 900px;
+            margin: 0 auto 40px;
+            font-weight: 300;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            background: rgba(0,0,0,0.95);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .logo {
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--accent-primary);
+            letter-spacing: -1px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+        }
+
+        nav a {
+            color: var(--text-high);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Grid System */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin: 80px 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 40px;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.1);
+        }
+
+        .card h3 {
+            color: var(--accent-primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            color: var(--text-med);
+            font-size: 1rem;
+        }
+
+        /* Diagram Component */
+        .diagram-container {
+            background: #020202;
+            border: 1px solid var(--border);
+            padding: 60px;
+            margin: 80px 0;
+            text-align: center;
+        }
+
+        .diagram-title {
+            margin-bottom: 40px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--text-med);
+            letter-spacing: 4px;
+            font-size: 1.2rem;
+        }
+
+        /* Table */
+        .highlight-box {
+            background: #050505;
+            padding: 50px;
+            border-left: 8px solid var(--accent-secondary);
+            margin: 60px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th, td {
+            padding: 25px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        td { color: var(--text-med); }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 18px 45px;
+            background: var(--accent-primary);
+            color: #000;
+            text-decoration: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #fff;
+            transform: scale(1.05);
+        }
+
+        /* Timeline */
+        .timeline {
+            max-width: 900px;
+            margin: 80px auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 80px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-low);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">FORTUNATRADE</div>
+        <ul>
+            <li><a href="#swarm">Swarm Map</a></li>
+            <li><a href="#stack">Smart Stack</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
+        <a href="#" class="btn" style="padding: 12px 24px;">Admin Portal</a>
+    </nav>
+
+    <!-- Video Integration -->
+    <div class="video-hero">
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/tcZ3W8QYirQ?autoplay=1&mute=1&loop=1&playlist=tcZ3W8QYirQ" 
+                title="Ai FortunaTrade Concept Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <header class="title-section">
+        <div class="container">
+            <h1>Ai FortunaTrade</h1>
+            <p class="subtitle">Deploying a 20-Agent cognitive swarm for predictive dominance in global markets. Built for foolproof autonomy, precision research, and high-yield execution.</p>
+            <div style="display: flex; justify-content: center; gap: 40px; font-weight: bold; letter-spacing: 1px;">
+                <span style="color: var(--success);">[ ACTIVE NODES: 20 ]</span>
+                <span style="color: var(--accent-primary);">[ LATENCY: 12ms ]</span>
+                <span style="color: var(--accent-secondary);">[ SECURITY: LEVEL 5 ]</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Swarm Diagram -->
+        <section id="swarm" class="diagram-container">
+            <p class="diagram-title">System Architecture: Agentic Swarm Mapping</p>
+            <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+                <!-- Connectors -->
+                <path d="M400 60 L200 160 M400 60 L400 160 M400 60 L600 160" stroke="#444" stroke-width="2" fill="none" />
+                <path d="M200 220 L100 320 M200 220 L300 320" stroke="#444" stroke-width="1" fill="none" />
+                <path d="M600 220 L500 320 M600 220 L700 320" stroke="#444" stroke-width="1" fill="none" />
+
+                <!-- Orchestrator -->
+                <rect x="300" y="10" width="200" height="70" fill="#000" stroke="#00f2ff" stroke-width="3" />
+                <text x="400" y="52" fill="#fff" font-size="16" text-anchor="middle" font-weight="900">CORE ORCHESTRATOR</text>
+
+                <!-- Intelligence Layers -->
+                <rect x="120" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                <text x="200" y="195" fill="#fff" font-size="12" text-anchor="middle">RECON SWARM</text>
+
+                <rect x="320" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                <text x="400" y="195" fill="#fff" font-size="12" text-anchor="middle">PROBABILITY ENGINE</text>
+
+                <rect x="520" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                <text x="600" y="195" fill="#fff" font-size="12" text-anchor="middle">EXECUTION SWARM</text>
+
+                <!-- Specialized Sub-Agents -->
+                <g transform="translate(100, 350)">
+                    <circle cx="0" cy="0" r="40" fill="#000" stroke="#333" />
+                    <text x="0" y="5" fill="#00f2ff" font-size="10" text-anchor="middle">SENTIMENT</text>
+                </g>
+                <g transform="translate(300, 350)">
+                    <circle cx="0" cy="0" r="40" fill="#000" stroke="#333" />
+                    <text x="0" y="5" fill="#00f2ff" font-size="10" text-anchor="middle">WEATHER</text>
+                </g>
+                <g transform="translate(500, 350)">
+                    <circle cx="0" cy="0" r="40" fill="#000" stroke="#333" />
+                    <text x="0" y="5" fill="#00f2ff" font-size="10" text-anchor="middle">SPORTS/API</text>
+                </g>
+                <g transform="translate(700, 350)">
+                    <circle cx="0" cy="0" r="40" fill="#000" stroke="#333" />
+                    <text x="0" y="5" fill="#00f2ff" font-size="10" text-anchor="middle">RISK GUARD</text>
+                </g>
+                
+                <text x="400" y="460" fill="#666" font-size="12" text-anchor="middle" font-style="italic">FIG 2.1: Multi-tier Agentic Hierarchy for Automated Market Dominance</text>
+            </svg>
+        </section>
+
+        <!-- Automated Research Loop -->
+        <div class="grid-3">
+            <div class="card">
+                <h3>Autonomous Discovery</h3>
+                <p>20 agents monitor FMP, NOAA, and OddsJam 24/7. When TDS (Technical Decision Support) detects a 5σ deviation in market efficiency, the system triggers a deep research event.</p>
+            </div>
+            <div class="card">
+                <h3>Precise Verification</h3>
+                <p>The system doesn't guess. It validates "Hidden Opportunities" by cross-referencing news sentiment with physical data points (e.g., stadium weather impacting prop bets).</p>
+            </div>
+            <div class="card">
+                <h3>Yield Optimization</h3>
+                <p>Using a proprietary "Kelly Swarm" logic, the risk-management agent calculates the exact fractional exposure needed to compound high-yield returns while safeguarding principal.</p>
+            </div>
+        </div>
+
+        <!-- The Smart Stack -->
+        <section id="stack" class="highlight-box">
+            <h2 style="font-size: 2.5rem; text-transform: uppercase; margin-bottom: 20px;">The Engineering Stack</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Smart Stack Tech</th>
+                        <th>Core Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>AI Orchestrator</td>
+                        <td>LangGraph / Claude 4</td>
+                        <td>Complex state management for 20 agents.</td>
+                    </tr>
+                    <tr>
+                        <td>Fast Execution</td>
+                        <td>Rust (Polymarket CLOB)</td>
+                        <td>Ultra-low latency transaction finalization.</td>
+                    </tr>
+                    <tr>
+                        <td>Data Ingestion</td>
+                        <td>Apify + Python MCP</td>
+                        <td>Scraping and standardizing web-based evidence.</td>
+                    </tr>
+                    <tr>
+                        <td>Security</td>
+                        <td>Docker + Private VPC</td>
+                        <td>100% self-hosted; your keys, your data.</td>
+                    </tr>
+                    <tr>
+                        <td>Interface</td>
+                        <td>Next.js 15 (Vanilla JS)</td>
+                        <td>Human-in-the-loop dashboard with MFA.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Security & Approvals -->
+        <section id="security" style="margin-top: 80px;">
+            <h2 style="text-transform: uppercase; margin-bottom: 30px; font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Security & Approval Architecture</h2>
+            <div class="card" style="border-right: 5px solid var(--danger);">
+                <p style="font-size: 1.2rem; color: #fff; margin-bottom: 25px;"><strong>The "Dead Man's Switch" Protocol:</strong> High-yield transactions require a signed "Evidence Dossier" approval via the mobile portal. The system presents the agentic reasoning, confidence scores, and raw data before execution.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="padding: 20px; border: 1px solid #222;">
+                        <h4 style="color: var(--accent-primary); margin-bottom: 10px;">User Auth</h4>
+                        <p style="font-size: 0.85rem; color: #aaa;">Multi-tenant secure login with biometric passkeys. Role-based access for Analysts vs. Admins.</p>
+                    </div>
+                    <div style="padding: 20px; border: 1px solid #222;">
+                        <h4 style="color: var(--accent-primary); margin-bottom: 10px;">Audit Log</h4>
+                        <p style="font-size: 0.85rem; color: #aaa;">Every single "thought" and research step taken by an agent is recorded in an immutable ledger.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section id="roadmap" class="timeline">
+            <h2 style="text-align: center; margin-bottom: 60px; font-size: 2.5rem; text-transform: uppercase;">Build Timeline</h2>
+            <div class="step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h4>Alpha Infrastructure (Week 1-3)</h4>
+                    <p>Provisioning the Ubuntu server, Docker orchestration, and initial data connector setup (FMP, NOAA, OddsJam).</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h4>Agent Personality Tuning (Week 4-6)</h4>
+                    <p>Programming the 20 discrete agent "Skills" and establishing the cross-agent communication protocols using Claude Code.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h4>Scale & Resale (Week 7+)</h4>
+                    <p>Finalizing the <strong>Claude Code Skill</strong> package for private redistribution or resale. Integration of full Human-In-The-Loop UI.</p>
+                </div>
+            </div>
+        </section>
+
+        <div style="text-align: center; padding: 100px 0;">
+            <a href="#" class="btn">Initiate Swarm Deployment</a>
+            <p style="margin-top: 25px; color: var(--text-low);">Estimated Development Time: 45 Days | Total Agents: 20</p>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 AI FORTUNATRADE. DESIGNED FOR AUTONOMOUS WEALTH GENERATION. PRIVATE SECURITY PROTOCOL ACTIVE.</p>
+    </footer>
+
+</body>
+</html>

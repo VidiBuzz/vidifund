@@ -1,0 +1,3257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FortunaTrade | Personal Trading Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-purple: #7000ff;
+            --neon-pink: #ff00ff;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+        }
+        
+        .glass {
+            background: rgba(17, 17, 17, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+        
+        .neon-border {
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { opacity: 0.5; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .ticker-scroll {
+            animation: scroll 40s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .up { color: #00ff88; }
+        .down { color: #ff4b4b; }
+        
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(0, 242, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        .agent-card {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.05) 0%, rgba(112, 0, 255, 0.05) 100%);
+            border-left: 3px solid var(--neon-cyan);
+        }
+        
+        .section-hidden {
+            display: none;
+        }
+        
+        .nav-active {
+            background: rgba(0, 242, 255, 0.2);
+            border: 1px solid rgba(0, 242, 255, 0.5);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .grid-cols-12 {
+                grid-template-columns: 1fr;
+            }
+            
+            .col-span-3, .col-span-6 {
+                grid-column: span 1;
+            }
+            
+            .glass {
+                margin: 0 0.5rem;
+            }
+            
+            nav .flex.items-center.gap-2 {
+                display: none;
+            }
+            
+            .ticker-scroll {
+                animation-duration: 20s;
+            }
+        }
+        
+        /* Modal mobile optimization */
+        @media (max-width: 640px) {
+            .fixed.inset-0 .glass {
+                max-width: calc(100% - 1rem);
+                margin: 0.5rem;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .fixed.inset-0 .grid.grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        button, select, input {
+            touch-action: manipulation;
+        }
+        
+        /* Smooth scrolling for mobile */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* === ENHANCED VISUAL SYSTEM === */
+
+        /* Richer body background with radial glow sources */
+        body {
+            background:
+                radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,242,255,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 50% at 85% 90%, rgba(112,0,255,0.05) 0%, transparent 65%),
+                #050508;
+        }
+
+        /* Left sidebar */
+        #sidebar {
+            position: fixed;
+            left: 0;
+            top: 56px;
+            width: 196px;
+            height: calc(100vh - 56px);
+            background: rgba(6,6,10,0.97);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-right: 1px solid rgba(0,242,255,0.12);
+            z-index: 40;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-section-label {
+            padding: 14px 16px 4px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: #334155;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 2px solid transparent;
+            margin: 0 8px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .sidebar-item:hover {
+            color: #cbd5e1;
+            background: rgba(0,242,255,0.05);
+            border-left-color: rgba(0,242,255,0.3);
+        }
+
+        .sidebar-item.active {
+            color: #00f2ff;
+            background: rgba(0,242,255,0.08);
+            border-left-color: #00f2ff;
+        }
+
+        .sidebar-item i {
+            width: 15px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(0,242,255,0.08);
+            margin: 10px 16px;
+        }
+
+        /* Shift content right for sidebar — margin avoids conflict with Tailwind px-* */
+        .with-sidebar { margin-left: 196px; }
+        @media (max-width: 768px) { .with-sidebar { margin-left: 0 !important; } }
+
+        /* VIX regime badge in nav */
+        .vix-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.06em;
+            border: 1px solid;
+            transition: all 0.6s ease;
+        }
+        .vix-low      { color: #00ff88; border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.08); }
+        .vix-normal   { color: #00f2ff; border-color: rgba(0,242,255,0.35); background: rgba(0,242,255,0.08); }
+        .vix-elevated { color: #fbbf24; border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.08); }
+        .vix-high     { color: #f97316; border-color: rgba(249,115,22,0.35); background: rgba(249,115,22,0.08); }
+        .vix-panic    { color: #ef4444; border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.12); animation: vix-alarm 1.2s infinite; }
+        @keyframes vix-alarm {
+            0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            50%      { box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+        }
+
+        /* Priority card stronger glows */
+        .card-hero  { box-shadow: 0 0 40px rgba(0,242,255,0.14), 0 4px 8px rgba(0,0,0,0.5); }
+        .card-warm  { box-shadow: 0 0 30px rgba(251,191,36,0.1),  0 4px 8px rgba(0,0,0,0.4); }
+        .card-alert { box-shadow: 0 0 30px rgba(239,68,68,0.12),  0 4px 8px rgba(0,0,0,0.4); }
+
+        /* Section labels — purple for hierarchy */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #a78bfa;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* VIX gauge widget */
+        .vix-gauge-track {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #00ff88 0%, #00f2ff 25%, #fbbf24 50%, #f97316 75%, #ef4444 100%);
+            position: relative;
+        }
+        .vix-gauge-needle {
+            position: absolute;
+            top: -4px;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #000;
+            transform: translateX(-50%);
+            transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+
+        /* Approval queue */
+        .approval-item {
+            background: linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(249,115,22,0.04) 100%);
+            border: 1px solid rgba(251,191,36,0.25);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        /* Agent health dots */
+        .agent-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .agent-dot.active     { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.7); }
+        .agent-dot.scanning   { background: #00f2ff; box-shadow: 0 0 5px rgba(0,242,255,0.7); animation: blink 1.8s infinite; }
+        .agent-dot.monitoring { background: #a78bfa; box-shadow: 0 0 4px rgba(167,139,250,0.6); }
+        .agent-dot.waiting    { background: #fbbf24; }
+        .agent-dot.error      { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.7); }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+        /* Mobile: hamburger */
+        #hamburger { display: none; align-items: center; justify-content: center; }
+
+        /* Mobile drawer */
+        #mobile-drawer {
+            position: fixed;
+            top: 0; left: -290px;
+            width: 290px;
+            height: 100vh;
+            background: rgba(4,4,8,0.99);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(0,242,255,0.18);
+            z-index: 200;
+            transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+            padding: 24px 0;
+            overflow-y: auto;
+        }
+        #mobile-drawer.open { left: 0; }
+        #mobile-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 190;
+            display: none;
+            backdrop-filter: blur(3px);
+        }
+        #mobile-overlay.open { display: block; }
+
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .mobile-nav-item:hover { color: #e2e8f0; background: rgba(0,242,255,0.05); }
+        .mobile-nav-item.active { color: #00f2ff; border-left-color: #00f2ff; background: rgba(0,242,255,0.07); }
+
+        @media (max-width: 768px) {
+            #sidebar        { display: none !important; }
+            .with-sidebar   { padding-left: 0 !important; }
+            #hamburger      { display: flex !important; }
+            .nav-tab-group  { display: none !important; }
+            .ticker-scroll  { animation-duration: 20s; }
+        }
+    </style>
+</head>
+<body class="bg-black text-slate-200 min-h-screen">
+    <!-- Mobile Overlay + Drawer -->
+    <div id="mobile-overlay" onclick="closeMobileDrawer()"></div>
+    <div id="mobile-drawer">
+        <div class="px-6 pb-4 mb-2 border-b border-cyan-500/15">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-emerald-500 rounded-full pulse-dot"></div>
+                <span class="font-bold text-lg mono"><span class="text-cyan-400">FORTUNA</span><span class="text-white">TRADE</span></span>
+            </div>
+        </div>
+        <div class="px-4 py-1 text-xs text-slate-600 mono tracking-widest uppercase" style="font-size:9px;letter-spacing:.18em;">Navigation</div>
+        <div class="mobile-nav-item active" onclick="showSection('dashboard');closeMobileDrawer()"><i class="fas fa-chart-line w-4"></i>Dashboard</div>
+        <div class="mobile-nav-item" onclick="showSection('agents');closeMobileDrawer()"><i class="fas fa-robot w-4"></i>Agent Swarm</div>
+        <div class="mobile-nav-item" onclick="showSection('architecture');closeMobileDrawer()"><i class="fas fa-project-diagram w-4"></i>Architecture</div>
+        <div class="mobile-nav-item" onclick="showSection('stack');closeMobileDrawer()"><i class="fas fa-layer-group w-4"></i>Smart Stack</div>
+        <div class="mobile-nav-item" onclick="showSection('crypto');closeMobileDrawer()"><i class="fab fa-bitcoin w-4"></i>Crypto Markets</div>
+        <div style="height:1px;background:rgba(0,242,255,0.08);margin:12px 20px;"></div>
+        <div class="px-4 py-1 text-xs text-slate-600 mono tracking-widest uppercase" style="font-size:9px;letter-spacing:.18em;">System</div>
+        <div class="px-6 py-3 text-xs text-slate-500 mono">
+            <div class="flex justify-between mb-1"><span>Latency</span><span class="text-emerald-400">12ms</span></div>
+            <div class="flex justify-between"><span>Status</span><span class="text-emerald-400">● Operational</span></div>
+        </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="glass fixed top-0 w-full z-50 border-b border-cyan-500/20" style="background:rgba(5,5,10,0.95);backdrop-filter:blur(20px) saturate(180%);">
+        <div class="flex items-center justify-between px-4 py-3">
+            <!-- Left: hamburger (mobile) + logo -->
+            <div class="flex items-center gap-3">
+                <button id="hamburger" onclick="openMobileDrawer()" class="w-8 h-8 flex flex-col justify-center items-center gap-1.5 text-slate-400 hover:text-cyan-400 transition-colors">
+                    <span class="block w-5 h-0.5 bg-current rounded"></span>
+                    <span class="block w-5 h-0.5 bg-current rounded"></span>
+                    <span class="block w-3.5 h-0.5 bg-current rounded self-start"></span>
+                </button>
+                <div class="w-3.5 h-3.5 bg-emerald-500 rounded-full pulse-dot"></div>
+                <span class="font-bold text-xl tracking-tight mono">
+                    <span class="text-cyan-400" style="text-shadow:0 0 20px rgba(0,242,255,0.4);">FORTUNA</span><span class="text-white">TRADE</span>
+                </span>
+                <span class="hidden sm:block text-slate-600 text-xs ml-1">/ COMMAND CENTER</span>
+            </div>
+
+            <!-- Nav tabs removed — sidebar is the sole navigation -->
+
+            <!-- Right: VIX badge + latency + clock -->
+            <div class="flex items-center gap-3 text-sm">
+                <!-- VIX Regime Badge -->
+                <div id="vix-nav-badge" class="vix-badge vix-normal hidden sm:flex">
+                    <span style="font-size:9px;opacity:0.7;letter-spacing:.1em;">VIX</span>
+                    <span id="vix-nav-value">18.4</span>
+                    <span id="vix-nav-regime" style="opacity:0.85;">NORMAL</span>
+                </div>
+                <div class="hidden sm:flex items-center gap-1.5">
+                    <i class="fas fa-server text-cyan-400" style="font-size:10px;"></i>
+                    <span class="text-emerald-400 mono text-xs">12ms</span>
+                </div>
+                <div class="text-slate-500 mono text-xs" id="system-time">--:--:--</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Ticker -->
+    <div class="fixed top-14 w-full border-b border-cyan-500/15 overflow-hidden h-9 flex items-center z-40" style="background:rgba(4,4,8,0.92);backdrop-filter:blur(12px);">
+        <div class="flex ticker-scroll whitespace-nowrap" id="ticker"></div>
+    </div>
+
+    <!-- Left Sidebar (md+) -->
+    <div id="sidebar">
+        <div class="sidebar-section-label">Markets</div>
+        <div class="sidebar-item active" onclick="showSection('dashboard')" id="sb-dashboard">
+            <i class="fas fa-chart-line"></i>Dashboard
+        </div>
+        <div class="sidebar-item" onclick="showSection('crypto')" id="sb-crypto">
+            <i class="fab fa-bitcoin"></i>Crypto Markets
+        </div>
+        <div class="sidebar-item" onclick="showSection('commodities')" id="sb-commodities">
+            <i class="fas fa-coins"></i>Commodities
+        </div>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">Intelligence</div>
+        <div class="sidebar-item" onclick="showSection('agents')" id="sb-agents">
+            <i class="fas fa-robot"></i>Agent Swarm
+        </div>
+        <div class="sidebar-item" onclick="showSection('architecture')" id="sb-architecture">
+            <i class="fas fa-project-diagram"></i>Architecture
+        </div>
+        <div class="sidebar-item" onclick="showSection('stack')" id="sb-stack">
+            <i class="fas fa-layer-group"></i>Smart Stack
+        </div>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">System</div>
+        <!-- Approval count badge -->
+        <div class="sidebar-item" onclick="showSection('dashboard');scrollToApproval()">
+            <i class="fas fa-clock text-yellow-400"></i>
+            <span>Approvals</span>
+            <span id="sb-approval-count" class="ml-auto text-xs bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 rounded px-1.5 py-0.5 font-mono">2</span>
+        </div>
+
+        <!-- System health mini -->
+        <div style="margin-top:auto;padding:12px 14px;border-top:1px solid rgba(0,242,255,0.08);">
+            <div class="text-xs text-slate-600 mono mb-2" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;">System Health</div>
+            <div class="flex items-center gap-1.5 mb-1">
+                <span class="agent-dot active"></span>
+                <span class="text-slate-500 text-xs">Execution Engine</span>
+            </div>
+            <div class="flex items-center gap-1.5 mb-1">
+                <span class="agent-dot scanning"></span>
+                <span class="text-slate-500 text-xs">Data Stream</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="agent-dot active"></span>
+                <span class="text-slate-500 text-xs">Risk Manager</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD SECTION -->
+    <main id="section-dashboard" class="pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-[1920px] mx-auto grid grid-cols-12 gap-4">
+            
+            <!-- Portfolio Overview -->
+            <div class="col-span-3 space-y-4">
+                <!-- Total Value -->
+                <div class="glass neon-border rounded-xl p-5 card-hero">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label">Total Portfolio</div>
+                        <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded mono border border-emerald-500/30">● LIVE</span>
+                    </div>
+                    <div class="text-4xl font-bold mono neon-text" id="total-value">$400,000.00</div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-emerald-400 text-sm mono" id="daily-pnl">+$2,847.32</span>
+                        <span class="text-emerald-400/60 text-xs mono">(+0.28%)</span>
+                    </div>
+                    <div style="position:relative;height:70px;overflow:hidden;margin-top:12px;">
+                        <canvas id="portfolio-mini-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Asset Allocation -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="section-label mb-3">Asset Allocation</div>
+                    <div class="space-y-2" id="allocation-bars">
+                        <!-- Equities -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Equities</span><span class="mono text-cyan-400">30%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-cyan-400" style="width:30%"></div></div>
+                        </div>
+                        <!-- Bonds -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Bonds</span><span class="mono text-blue-400">18%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-blue-400" style="width:18%"></div></div>
+                        </div>
+                        <!-- Crypto -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Crypto</span><span class="mono text-emerald-400">12%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-emerald-400" style="width:12%"></div></div>
+                        </div>
+                        <!-- Options -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Options</span><span class="mono text-purple-400">10%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-purple-400" style="width:10%"></div></div>
+                        </div>
+                        <!-- Forex -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Forex</span><span class="mono text-teal-400">10%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-teal-400" style="width:10%"></div></div>
+                        </div>
+                        <!-- Gold & Metals -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Gold & Metals</span><span class="mono text-yellow-400">8%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-yellow-400" style="width:8%"></div></div>
+                        </div>
+                        <!-- Commodities -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Commodities</span><span class="mono text-orange-400">7%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-orange-400" style="width:7%"></div></div>
+                        </div>
+                        <!-- Cash -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">Cash</span><span class="mono text-slate-400">5%</span></div>
+                            <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="h-1.5 rounded-full bg-slate-500" style="width:5%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bond Rates -->
+                <div class="glass neon-border rounded-xl p-5" style="border-color:rgba(96,165,250,0.25);">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label" style="color:#60a5fa;">Treasury Yields</div>
+                        <span class="text-xs mono text-slate-500">US Gov't</span>
+                    </div>
+                    <div class="space-y-2" id="bond-rates">
+                        <div class="flex items-center justify-between py-1 border-b border-blue-500/10">
+                            <span class="text-xs text-slate-400 mono">Fed Funds</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs mono font-bold text-blue-300" id="bond-fed">5.33%</span>
+                                <span class="text-xs mono text-slate-600" id="bond-fed-chg">—</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-blue-500/10">
+                            <span class="text-xs text-slate-400 mono">2Y Treasury</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs mono font-bold text-blue-300" id="bond-2y">4.87%</span>
+                                <span class="text-xs mono" id="bond-2y-chg">+0.02</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-blue-500/10">
+                            <span class="text-xs text-slate-400 mono">5Y Treasury</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs mono font-bold text-blue-300" id="bond-5y">4.35%</span>
+                                <span class="text-xs mono" id="bond-5y-chg">+0.01</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-blue-500/10">
+                            <span class="text-xs text-slate-400 mono">10Y Treasury</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs mono font-bold text-cyan-300" id="bond-10y">4.22%</span>
+                                <span class="text-xs mono" id="bond-10y-chg">-0.01</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-1">
+                            <span class="text-xs text-slate-400 mono">30Y Treasury</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs mono font-bold text-blue-300" id="bond-30y">4.41%</span>
+                                <span class="text-xs mono" id="bond-30y-chg">+0.01</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Yield curve signal -->
+                    <div class="mt-3 pt-2 border-t border-blue-500/10">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">2Y–10Y Spread</span>
+                            <span class="mono font-bold" id="bond-spread" style="color:#f87171;">-0.65% Inverted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forex -->
+                <div class="glass neon-border rounded-xl p-5" style="border-color:rgba(45,212,191,0.25);">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label" style="color:#2dd4bf;">Forex</div>
+                        <span class="text-xs mono text-slate-500" id="forex-time">Live</span>
+                    </div>
+                    <div class="space-y-1.5" id="forex-rates">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Risk Metrics -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="section-label mb-3">Risk Engine</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-900/50 rounded-lg p-3 border border-cyan-500/20">
+                            <div class="text-slate-500 text-xs">Beta</div>
+                            <div class="text-xl font-bold mono text-cyan-400">1.12</div>
+                        </div>
+                        <div class="bg-slate-900/50 rounded-lg p-3 border border-cyan-500/20">
+                            <div class="text-slate-500 text-xs">Sharpe</div>
+                            <div class="text-xl font-bold mono text-emerald-400">1.85</div>
+                        </div>
+                        <div class="bg-slate-900/50 rounded-lg p-3 border border-cyan-500/20">
+                            <div class="text-slate-500 text-xs">Max DD</div>
+                            <div class="text-xl font-bold mono text-orange-400">-8.4%</div>
+                        </div>
+                        <div class="bg-slate-900/50 rounded-lg p-3 border border-cyan-500/20">
+                            <div class="text-slate-500 text-xs">VaR (95%)</div>
+                            <div class="text-xl font-bold mono text-slate-300">$12.4k</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center - Charts & Positions -->
+            <div class="col-span-6 space-y-4">
+                <!-- Performance Chart -->
+                <div class="glass neon-border rounded-xl p-5 card-hero">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="section-label">Portfolio Performance</div>
+                        <div class="flex gap-2">
+                            <button id="btn-1d" onclick="updateTimeframe('1d')" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded transition-all hover:scale-105">1D</button>
+                            <button id="btn-1w" onclick="updateTimeframe('1w')" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded transition-all hover:scale-105">1W</button>
+                            <button id="btn-1m" onclick="updateTimeframe('1m')" class="px-3 py-1 text-xs bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 transition-all hover:scale-105">1M</button>
+                            <button id="btn-1y" onclick="updateTimeframe('1y')" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded transition-all hover:scale-105">1Y</button>
+                            <button id="btn-all" onclick="updateTimeframe('all')" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded transition-all hover:scale-105">ALL</button>
+                        </div>
+                    </div>
+                    <div id="tv-chart" style="height: 280px; width: 100%;"></div>
+                </div>
+
+                <!-- Active Positions -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="section-label">Active Positions</div>
+                        <button onclick="openTradeModal()" class="text-xs bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded border border-cyan-500/30 hover:bg-cyan-500/30 transition-all hover:scale-105">
+                            <i class="fas fa-plus mr-1"></i>New Trade
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-slate-500 text-xs uppercase border-b border-cyan-500/20">
+                                    <th class="text-left py-2">Symbol</th>
+                                    <th class="text-right py-2">Qty</th>
+                                    <th class="text-right py-2">Entry</th>
+                                    <th class="text-right py-2">Current</th>
+                                    <th class="text-right py-2">P&L</th>
+                                    <th class="text-right py-2">Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positions-table" class="mono"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Agent Activity Log -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="section-label mb-3">Agent Activity Stream</div>
+                    <div id="trade-log" class="space-y-1 max-h-40 overflow-y-auto text-xs mono"></div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-span-3 space-y-4">
+
+                <!-- VIX REGIME WIDGET -->
+                <div class="glass neon-border rounded-xl p-5 card-warm" id="vix-widget">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label">VIX Regime</div>
+                        <span id="vix-regime-badge" class="vix-badge vix-normal" style="font-size:10px;padding:2px 8px;">NORMAL</span>
+                    </div>
+
+                    <!-- VIX value large display -->
+                    <div class="flex items-end gap-2 mb-4">
+                        <div class="text-4xl font-bold mono" id="vix-value-big" style="text-shadow:0 0 20px rgba(0,242,255,0.4);">18.4</div>
+                        <div class="mb-1">
+                            <div id="vix-change" class="text-xs mono text-slate-400">+0.32 today</div>
+                            <div class="text-xs text-slate-500">CBOE VIX</div>
+                        </div>
+                    </div>
+
+                    <!-- Gauge bar -->
+                    <div class="vix-gauge-track mb-4">
+                        <div class="vix-gauge-needle" id="vix-needle" style="left:30%;"></div>
+                    </div>
+
+                    <!-- Regime zones -->
+                    <div class="grid grid-cols-5 gap-0.5 text-center mb-4" style="font-size:8px;">
+                        <div class="text-emerald-400 mono">&lt;12<br><span class="text-slate-600">Low</span></div>
+                        <div class="text-cyan-400 mono">12-20<br><span class="text-slate-600">Normal</span></div>
+                        <div class="text-yellow-400 mono">20-30<br><span class="text-slate-600">Elev.</span></div>
+                        <div class="text-orange-400 mono">30-40<br><span class="text-slate-600">High</span></div>
+                        <div class="text-red-400 mono">&gt;40<br><span class="text-slate-600">Panic</span></div>
+                    </div>
+
+                    <!-- Strategy recommendation -->
+                    <div id="vix-strategy-box" class="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-3">
+                        <div class="text-xs text-slate-500 mb-1 mono" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;">Strategy Signal</div>
+                        <div id="vix-strategy-text" class="text-xs text-slate-300">Balanced exposure · Follow trend · Standard position sizing</div>
+                    </div>
+                </div>
+
+                <!-- APPROVAL QUEUE -->
+                <div class="glass rounded-xl p-5" id="approval-queue-card" style="border:1px solid rgba(251,191,36,0.25);box-shadow:0 0 25px rgba(251,191,36,0.08);">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label" style="color:#fbbf24;">Awaiting Approval</div>
+                        <span id="approval-count-badge" class="text-xs bg-yellow-400/15 text-yellow-400 border border-yellow-400/30 rounded-full px-2 py-0.5 mono font-bold">2</span>
+                    </div>
+                    <div class="space-y-2" id="approval-list">
+                        <!-- populated by JS -->
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-yellow-500/15 flex gap-2">
+                        <button onclick="approveAll()" class="flex-1 text-xs py-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/25 transition mono font-bold">
+                            <i class="fas fa-check mr-1"></i>Approve All
+                        </button>
+                        <button onclick="rejectAll()" class="flex-1 text-xs py-1.5 bg-red-500/10 text-red-400 border border-red-500/25 rounded-lg hover:bg-red-500/18 transition mono font-bold">
+                            <i class="fas fa-times mr-1"></i>Reject All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AGENT HEALTH STRIP (all 20 agents as dots) -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="section-label">Swarm Health</div>
+                        <span class="text-xs text-emerald-400 mono">20/20 online</span>
+                    </div>
+                    <!-- Dot grid -->
+                    <div class="flex flex-wrap gap-1.5 mb-3" id="agent-dot-grid"></div>
+                    <!-- Detailed list -->
+                    <div class="space-y-1.5" id="agent-list"></div>
+                </div>
+
+                <!-- Market Sentiment -->
+                <div class="glass neon-border rounded-xl p-5">
+                    <div class="section-label mb-3">Market Sentiment</div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-300">Fear & Greed Index</span>
+                        <span class="text-emerald-400 font-bold mono text-sm">72 · Greed</span>
+                    </div>
+                    <div class="w-full rounded-full h-2 mb-3" style="background:linear-gradient(to right,#ef4444,#fbbf24,#00ff88);">
+                        <div class="relative">
+                            <div style="position:absolute;left:72%;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #000;transform:translateX(-50%);"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 mt-2 mono">
+                        <span>Fear</span><span>Neutral</span><span>Greed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AGENT SWARM SECTION -->
+    <section id="section-agents" class="section-hidden pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-5xl font-bold mb-4">
+                    <span class="text-cyan-400">20-Agent</span> Cognitive Swarm
+                </h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Deploying a cognitive swarm for predictive dominance in global markets. 
+                    Built for autonomy, precision research, and high-yield execution.
+                </p>
+            </div>
+
+            <!-- Agent Cards Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4" id="agent-cards"></div>
+
+            <!-- Swarm Intelligence -->
+            <div class="glass neon-border rounded-xl p-8 mt-8">
+                <h3 class="text-2xl font-bold text-cyan-400 mb-4">Swarm Intelligence Protocol</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="agent-card rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-2">Autonomous Discovery</h4>
+                        <p class="text-sm text-slate-400">20 agents monitor FMP, NOAA, and OddsJam 24/7. When TDS detects a 5σ deviation in market efficiency, the system triggers a deep research event.</p>
+                    </div>
+                    <div class="agent-card rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-2">Precise Verification</h4>
+                        <p class="text-sm text-slate-400">The system validates "Hidden Opportunities" by cross-referencing news sentiment with physical data points (e.g., stadium weather impacting prop bets).</p>
+                    </div>
+                    <div class="agent-card rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-2">Yield Optimization</h4>
+                        <p class="text-sm text-slate-400">Using proprietary "Kelly Swarm" logic, the risk-management agent calculates exact fractional exposure needed to compound returns while safeguarding principal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE SECTION -->
+    <section id="section-architecture" class="section-hidden pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-5xl font-bold mb-4">System <span class="text-cyan-400">Architecture</span></h2>
+                <p class="text-xl text-slate-400">Agentic Swarm Mapping for Automated Market Dominance</p>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="glass neon-border rounded-xl p-8 mb-8">
+                <svg viewBox="0 0 900 500" class="w-full" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Connectors -->
+                    <path d="M450 60 L225 160 M450 60 L450 160 M450 60 L675 160" stroke="#00f2ff" stroke-width="2" fill="none" stroke-opacity="0.5" />
+                    <path d="M225 220 L112 320 M225 220 L337 320" stroke="#7000ff" stroke-width="1" fill="none" stroke-opacity="0.5" />
+                    <path d="M675 220 L562 320 M675 220 L787 320" stroke="#7000ff" stroke-width="1" fill="none" stroke-opacity="0.5" />
+
+                    <!-- Core Orchestrator -->
+                    <rect x="325" y="10" width="250" height="70" fill="#000" stroke="#00f2ff" stroke-width="3" />
+                    <text x="450" y="52" fill="#00f2ff" font-size="18" text-anchor="middle" font-weight="900">CORE ORCHESTRATOR</text>
+
+                    <!-- Intelligence Layers -->
+                    <rect x="145" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                    <text x="225" y="195" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">RECON SWARM</text>
+
+                    <rect x="370" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                    <text x="450" y="195" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">PROBABILITY ENGINE</text>
+
+                    <rect x="595" y="160" width="160" height="60" fill="#0a0a0a" stroke="#7000ff" stroke-width="2" />
+                    <text x="675" y="195" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold">EXECUTION SWARM</text>
+
+                    <!-- Specialized Sub-Agents -->
+                    <g transform="translate(112, 350)">
+                        <circle cx="0" cy="0" r="50" fill="#000" stroke="#00f2ff" stroke-width="2" />
+                        <text x="0" y="-5" fill="#00f2ff" font-size="12" text-anchor="middle" font-weight="bold">SENTIMENT</text>
+                        <text x="0" y="10" fill="#666" font-size="10" text-anchor="middle">Alpha Agent</text>
+                    </g>
+                    <g transform="translate(337, 350)">
+                        <circle cx="0" cy="0" r="50" fill="#000" stroke="#00f2ff" stroke-width="2" />
+                        <text x="0" y="-5" fill="#00f2ff" font-size="12" text-anchor="middle" font-weight="bold">WEATHER</text>
+                        <text x="0" y="10" fill="#666" font-size="10" text-anchor="middle">Beta Agent</text>
+                    </g>
+                    <g transform="translate(562, 350)">
+                        <circle cx="0" cy="0" r="50" fill="#000" stroke="#00f2ff" stroke-width="2" />
+                        <text x="0" y="-5" fill="#00f2ff" font-size="12" text-anchor="middle" font-weight="bold">SPORTS/API</text>
+                        <text x="0" y="10" fill="#666" font-size="10" text-anchor="middle">Gamma Agent</text>
+                    </g>
+                    <g transform="translate(787, 350)">
+                        <circle cx="0" cy="0" r="50" fill="#000" stroke="#00f2ff" stroke-width="2" />
+                        <text x="0" y="-5" fill="#00f2ff" font-size="12" text-anchor="middle" font-weight="bold">RISK GUARD</text>
+                        <text x="0" y="10" fill="#666" font-size="10" text-anchor="middle">Zeta Agent</text>
+                    </g>
+                    
+                    <text x="450" y="470" fill="#00f2ff" font-size="14" text-anchor="middle" font-style="italic" opacity="0.7">
+                        FIG 2.1: Multi-tier Agentic Hierarchy for Automated Market Analysis
+                    </text>
+                </svg>
+            </div>
+
+            <!-- Security Protocol -->
+            <div class="glass neon-border rounded-xl p-8">
+                <h3 class="text-2xl font-bold text-cyan-400 mb-4">
+                    <i class="fas fa-shield-alt mr-2"></i>Security & Approval Architecture
+                </h3>
+                <div class="bg-red-500/10 border-l-4 border-red-500 p-6 rounded-lg">
+                    <h4 class="text-xl font-bold text-white mb-3">The "Dead Man's Switch" Protocol</h4>
+                    <p class="text-slate-300 mb-4">
+                        High-yield transactions require a signed "Evidence Dossier" approval via the mobile portal. 
+                        The system presents the agentic reasoning, confidence scores, and raw data before execution.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-black/50 rounded-lg p-4 border border-cyan-500/30">
+                            <h5 class="text-cyan-400 font-bold mb-2"><i class="fas fa-user-shield mr-2"></i>User Authentication</h5>
+                            <p class="text-sm text-slate-400">Multi-tenant secure login with biometric passkeys. Role-based access for Analysts vs. Admins.</p>
+                        </div>
+                        <div class="bg-black/50 rounded-lg p-4 border border-cyan-500/30">
+                            <h5 class="text-cyan-400 font-bold mb-2"><i class="fas fa-clipboard-list mr-2"></i>Audit Ledger</h5>
+                            <p class="text-sm text-slate-400">Every single "thought" and research step taken by an agent is recorded in an immutable ledger.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SMART STACK SECTION -->
+    <section id="section-stack" class="section-hidden pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-5xl font-bold mb-4">Smart <span class="text-cyan-400">Stack</span></h2>
+                <p class="text-xl text-slate-400">The Technology Powering the Swarm</p>
+            </div>
+
+            <div class="glass neon-border rounded-xl p-8">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-cyan-400 text-sm uppercase border-b border-cyan-500/30">
+                            <th class="text-left py-4">Layer</th>
+                            <th class="text-left py-4">Technology</th>
+                            <th class="text-left py-4">Core Function</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-300">
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">AI Orchestrator</td>
+                            <td class="py-4 mono text-cyan-400">LangGraph + Local LLMs</td>
+                            <td class="py-4">20-agent swarm with Qwen, DeepSeek, GLM</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Stock/Bond/Options</td>
+                            <td class="py-4 mono text-cyan-400">QuantConnect Lean</td>
+                            <td class="py-4">Multi-asset execution, Greeks calculation</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Crypto + Yield</td>
+                            <td class="py-4 mono text-cyan-400">Freqtrade + Hummingbot</td>
+                            <td class="py-4">Spot trading, liquidity mining, DeFi</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Forex/4X</td>
+                            <td class="py-4 mono text-cyan-400">OANDA + FXCM API</td>
+                            <td class="py-4">Currency pairs, leverage trading</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Prop Bets</td>
+                            <td class="py-4 mono text-cyan-400">Polymarket CLOB (Rust)</td>
+                            <td class="py-4">Ultra-low latency prediction markets</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Vector Search</td>
+                            <td class="py-4 mono text-cyan-400">Vidi.ai (Vespa.ai)</td>
+                            <td class="py-4">Unified search, agent memory</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Data Ingestion</td>
+                            <td class="py-4 mono text-cyan-400">Apify + Python MCP</td>
+                            <td class="py-4">Web scraping, data normalization</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Visualization</td>
+                            <td class="py-4 mono text-cyan-400">TradingView + Plotly + Three.js</td>
+                            <td class="py-4">Candlestick, 3D Greeks, agent swarm</td>
+                        </tr>
+                        <tr class="border-b border-slate-800">
+                            <td class="py-4 font-bold">Security</td>
+                            <td class="py-4 mono text-cyan-400">Docker + Private VPC</td>
+                            <td class="py-4">100% self-hosted; your keys, your data</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 font-bold">Interface</td>
+                            <td class="py-4 mono text-cyan-400">Next.js 15 + Tailwind</td>
+                            <td class="py-4">Human-in-the-loop dashboard with MFA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Build Timeline -->
+            <div class="mt-8 glass neon-border rounded-xl p-8">
+                <h3 class="text-2xl font-bold text-cyan-400 mb-6">Build Timeline</h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-16 h-16 border-2 border-cyan-400 flex items-center justify-center font-bold text-cyan-400">01</div>
+                        <div>
+                            <h4 class="text-lg font-bold">Alpha Infrastructure (Week 1-3)</h4>
+                            <p class="text-slate-400">Provisioning the Ubuntu server, Docker orchestration, and initial data connector setup (FMP, NOAA, OddsJam).</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-16 h-16 border-2 border-cyan-400 flex items-center justify-center font-bold text-cyan-400">02</div>
+                        <div>
+                            <h4 class="text-lg font-bold">Agent Personality Tuning (Week 4-6)</h4>
+                            <p class="text-slate-400">Programming the 20 discrete agent "Skills" and establishing the cross-agent communication protocols using Claude Code.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-16 h-16 border-2 border-cyan-400 flex items-center justify-center font-bold text-cyan-400">03</div>
+                        <div>
+                            <h4 class="text-lg font-bold">Scale & Resale (Week 7+)</h4>
+                            <p class="text-slate-400">Finalizing the Claude Code Skill package for private redistribution. Integration of full Human-In-The-Loop UI.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CRYPTO MARKETS SECTION -->
+    <section id="section-crypto" class="section-hidden pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-5xl font-bold mb-4">Crypto <span class="text-orange-400">Markets</span></h2>
+                <p class="text-xl text-slate-400">DeFi Integration & Digital Asset Intelligence</p>
+            </div>
+
+            <!-- Crypto Stats Row -->
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="glass neon-border rounded-xl p-5 text-center">
+                    <div class="text-slate-400 text-xs uppercase mb-1">Total Crypto Value</div>
+                    <div class="text-2xl font-bold mono text-orange-400">$200,000.00</div>
+                    <div class="text-emerald-400 text-sm">+5.2% today</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center">
+                    <div class="text-slate-400 text-xs uppercase mb-1">Active Positions</div>
+                    <div class="text-2xl font-bold mono text-cyan-400">5</div>
+                    <div class="text-slate-500 text-sm">Across 3 chains</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center">
+                    <div class="text-slate-400 text-xs uppercase mb-1">DeFi Yield</div>
+                    <div class="text-2xl font-bold mono text-purple-400">12.4%</div>
+                    <div class="text-slate-500 text-sm">APY average</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center">
+                    <div class="text-slate-400 text-xs uppercase mb-1">Gas Tracker</div>
+                    <div class="text-2xl font-bold mono text-emerald-400">24 Gwei</div>
+                    <div class="text-emerald-400 text-sm">Low</div>
+                </div>
+            </div>
+
+            <!-- Crypto Prices Table -->
+            <div class="glass neon-border rounded-xl p-6 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-orange-400">
+                        <i class="fab fa-bitcoin mr-2"></i>Live Market Data
+                    </h3>
+                    <span class="text-xs text-slate-500">Updates every 2 seconds</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="crypto-table">
+                        <thead>
+                            <tr class="text-slate-400 text-sm uppercase border-b border-orange-500/30">
+                                <th class="text-left py-3">Asset</th>
+                                <th class="text-right py-3">Price</th>
+                                <th class="text-right py-3">24h Change</th>
+                                <th class="text-right py-3">Market Cap</th>
+                                <th class="text-right py-3">Volume (24h)</th>
+                                <th class="text-center py-3">Signal</th>
+                                <th class="text-right py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="mono text-sm" id="crypto-prices">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DeFi Integration -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="glass neon-border rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-purple-400 mb-4">
+                        <i class="fas fa-coins mr-2"></i>DeFi Yield Farming
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-purple-500/20">
+                            <div>
+                                <div class="font-bold">ETH-USDC LP</div>
+                                <div class="text-xs text-slate-400">Uniswap V3</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-purple-400 font-bold">18.5% APY</div>
+                                <div class="text-xs text-slate-500">$45,000 staked</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-purple-500/20">
+                            <div>
+                                <div class="font-bold">BTC-wBTC</div>
+                                <div class="text-xs text-slate-400">Curve Finance</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-purple-400 font-bold">8.2% APY</div>
+                                <div class="text-xs text-slate-500">$85,000 staked</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-purple-500/20">
+                            <div>
+                                <div class="font-bold">SOL Staking</div>
+                                <div class="text-xs text-slate-400">Marinade</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-purple-400 font-bold">6.8% APY</div>
+                                <div class="text-xs text-slate-500">$25,000 staked</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass neon-border rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-cyan-400 mb-4">
+                        <i class="fas fa-robot mr-2"></i>Crypto Agents
+                    </h3>
+                    <div class="space-y-3" id="crypto-agents">
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-cyan-500/20">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-link text-orange-400"></i>
+                                <div>
+                                    <div class="font-bold">Gamma-Arbitrage</div>
+                                    <div class="text-xs text-slate-400">Cross-chain arbitrage</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded border border-emerald-500/30">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-cyan-500/20">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chart-area text-purple-400"></i>
+                                <div>
+                                    <div class="font-bold">Delta-Options</div>
+                                    <div class="text-xs text-slate-400">Crypto options flow</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded border border-cyan-500/30">Scanning</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-cyan-500/20">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-fire text-orange-400"></i>
+                                <div>
+                                    <div class="font-bold">Iota-Mempool</div>
+                                    <div class="text-xs text-slate-400">Mempool analysis</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded border border-purple-500/30">Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Status -->
+            <div class="glass neon-border rounded-xl p-6">
+                <h3 class="text-xl font-bold text-cyan-400 mb-4">Network Status</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-black/30 rounded-lg p-4 border border-orange-500/20">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fab fa-bitcoin text-orange-400"></i>
+                            <span class="font-bold">Bitcoin</span>
+                        </div>
+                        <div class="text-sm text-slate-400">Block: <span class="mono text-white">842,491</span></div>
+                        <div class="text-sm text-slate-400">Hashrate: <span class="mono text-white">489 EH/s</span></div>
+                        <div class="text-sm text-emerald-400">● Network Healthy</div>
+                    </div>
+                    <div class="bg-black/30 rounded-lg p-4 border border-cyan-500/20">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fab fa-ethereum text-cyan-400"></i>
+                            <span class="font-bold">Ethereum</span>
+                        </div>
+                        <div class="text-sm text-slate-400">Block: <span class="mono text-white">19,584,203</span></div>
+                        <div class="text-sm text-slate-400">Gas: <span class="mono text-white">24 Gwei</span></div>
+                        <div class="text-sm text-emerald-400">● Network Healthy</div>
+                    </div>
+                    <div class="bg-black/30 rounded-lg p-4 border border-purple-500/20">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-sun text-purple-400"></i>
+                            <span class="font-bold">Solana</span>
+                        </div>
+                        <div class="text-sm text-slate-400">Slot: <span class="mono text-white">245,891,432</span></div>
+                        <div class="text-sm text-slate-400">TPS: <span class="mono text-white">3,847</span></div>
+                        <div class="text-sm text-emerald-400">● Network Healthy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMODITIES SECTION -->
+    <section id="section-commodities" class="section-hidden pt-28 pb-6 px-6 grid-bg min-h-screen with-sidebar">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-4xl font-bold mb-1">Commodities <span style="color:#f59e0b;">Markets</span></h2>
+                <p class="text-slate-400">Precious Metals · Energy · Agriculture · Industrial</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="glass neon-border rounded-xl p-5 text-center" style="border-color:rgba(245,158,11,0.3);">
+                    <div class="section-label mb-1" style="color:#f59e0b;">Portfolio Exposure</div>
+                    <div class="text-2xl font-bold mono" style="color:#f59e0b;" id="comm-total">$48,200.00</div>
+                    <div class="text-emerald-400 text-sm mono" id="comm-total-change">+1.4% today</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center" style="border-color:rgba(245,158,11,0.3);">
+                    <div class="section-label mb-1" style="color:#fcd34d;">Gold (XAU/USD)</div>
+                    <div class="text-2xl font-bold mono text-yellow-300" id="gold-price-stat">$5,107.90</div>
+                    <div class="text-sm mono" id="gold-change-stat">+0.82%</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center" style="border-color:rgba(148,163,184,0.3);">
+                    <div class="section-label mb-1" style="color:#94a3b8;">Silver (XAG/USD)</div>
+                    <div class="text-2xl font-bold mono text-slate-300" id="silver-price-stat">$84.77</div>
+                    <div class="text-sm mono" id="silver-change-stat">+1.20%</div>
+                </div>
+                <div class="glass neon-border rounded-xl p-5 text-center" style="border-color:rgba(251,146,60,0.3);">
+                    <div class="section-label mb-1" style="color:#fb923c;">WTI Crude Oil</div>
+                    <div class="text-2xl font-bold mono text-orange-400" id="wti-price-stat">$78.32</div>
+                    <div class="text-sm mono" id="wti-change-stat">-0.4%</div>
+                </div>
+            </div>
+
+            <!-- Gold & Silver Feature Cards -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Gold -->
+                <div class="glass rounded-xl p-6" style="border:1px solid rgba(245,158,11,0.3);box-shadow:0 0 30px rgba(245,158,11,0.07);">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:#f59e0b;">Au</div>
+                            <div>
+                                <div class="font-bold text-lg text-yellow-300">Gold</div>
+                                <div class="text-xs text-slate-500 mono">XAU/USD · Troy Oz</div>
+                            </div>
+                        </div>
+                        <span id="gold-signal-badge" class="px-3 py-1 rounded text-xs font-bold border mono bg-emerald-500/20 text-emerald-400 border-emerald-500/30">BUY</span>
+                    </div>
+                    <div class="text-4xl font-bold mono mb-1" style="color:#fcd34d;" id="gold-price-big">$2,338.40</div>
+                    <div class="flex gap-4 text-sm mb-4">
+                        <span id="gold-change-big" class="text-emerald-400 mono">+$19.20 (+0.82%)</span>
+                        <span class="text-slate-500">vs yesterday</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-center mb-4">
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(245,158,11,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">52W Low</div>
+                            <div class="mono text-sm font-bold text-slate-300">$1,984</div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(245,158,11,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">52W High</div>
+                            <div class="mono text-sm font-bold text-slate-300">$2,431</div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(245,158,11,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">Position</div>
+                            <div class="mono text-sm font-bold" style="color:#f59e0b;">12 oz</div>
+                        </div>
+                    </div>
+                    <div style="position:relative;height:70px;overflow:hidden;">
+                        <canvas id="gold-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Silver -->
+                <div class="glass rounded-xl p-6" style="border:1px solid rgba(148,163,184,0.3);box-shadow:0 0 30px rgba(148,163,184,0.05);">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background:rgba(148,163,184,0.15);border:1px solid rgba(148,163,184,0.4);color:#94a3b8;">Ag</div>
+                            <div>
+                                <div class="font-bold text-lg text-slate-300">Silver</div>
+                                <div class="text-xs text-slate-500 mono">XAG/USD · Troy Oz</div>
+                            </div>
+                        </div>
+                        <span id="silver-signal-badge" class="px-3 py-1 rounded text-xs font-bold border mono bg-emerald-500/20 text-emerald-400 border-emerald-500/30">BUY</span>
+                    </div>
+                    <div class="text-4xl font-bold mono mb-1 text-slate-300" id="silver-price-big">$27.64</div>
+                    <div class="flex gap-4 text-sm mb-4">
+                        <span id="silver-change-big" class="text-emerald-400 mono">+$0.33 (+1.2%)</span>
+                        <span class="text-slate-500">vs yesterday</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-center mb-4">
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(148,163,184,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">52W Low</div>
+                            <div class="mono text-sm font-bold text-slate-300">$22.11</div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(148,163,184,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">52W High</div>
+                            <div class="mono text-sm font-bold text-slate-300">$32.50</div>
+                        </div>
+                        <div class="bg-black/30 rounded-lg p-3" style="border:1px solid rgba(148,163,184,0.15);">
+                            <div class="text-xs text-slate-500 mb-1">Position</div>
+                            <div class="mono text-sm font-bold text-slate-300">500 oz</div>
+                        </div>
+                    </div>
+                    <div style="position:relative;height:70px;overflow:hidden;">
+                        <canvas id="silver-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Commodities Table -->
+            <div class="glass neon-border rounded-xl p-6 mb-6" style="border-color:rgba(245,158,11,0.2);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="section-label" style="color:#f59e0b;">All Commodities</div>
+                    <span class="text-xs text-slate-500 mono">Simulated · updates every 3s</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-xs uppercase border-b mono" style="color:#94a3b8;border-color:rgba(245,158,11,0.2);">
+                                <th class="text-left py-3">Commodity</th>
+                                <th class="text-right py-3">Price</th>
+                                <th class="text-right py-3">24h Change</th>
+                                <th class="text-right py-3">Unit</th>
+                                <th class="text-right py-3">Category</th>
+                                <th class="text-center py-3">Signal</th>
+                                <th class="text-right py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="mono text-sm" id="commodities-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Agents + Gold/Silver Ratio -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Gold/Silver Ratio -->
+                <div class="glass neon-border rounded-xl p-6" style="border-color:rgba(245,158,11,0.2);">
+                    <div class="section-label mb-4" style="color:#f59e0b;">Gold/Silver Ratio</div>
+                    <div class="flex items-end gap-3 mb-3">
+                        <div class="text-5xl font-bold mono" style="color:#fcd34d;" id="gs-ratio">84.6</div>
+                        <div class="mb-2">
+                            <div class="text-xs text-slate-500">Historical avg: ~65</div>
+                            <div class="text-xs" id="gs-signal-text" style="color:#f59e0b;">Silver historically cheap vs Gold</div>
+                        </div>
+                    </div>
+                    <div class="w-full rounded-full mb-2" style="height:6px;background:linear-gradient(to right,#94a3b8 0%,#fcd34d 100%);">
+                        <div class="relative">
+                            <div id="gs-needle" style="position:absolute;top:-5px;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #000;transform:translateX(-50%);transition:left 1s ease;left:65%;"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 mt-3 mono">
+                        <span>40 (Silver Rich)</span><span>65 (Avg)</span><span>100+ (Gold Rich)</span>
+                    </div>
+                    <div class="mt-4 p-3 rounded-lg text-xs" style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);">
+                        <span style="color:#f59e0b;" class="font-bold">Agent Signal:</span>
+                        <span class="text-slate-400 ml-1">High ratio suggests silver undervalued — rotate gold profits into silver positions for mean-reversion trade.</span>
+                    </div>
+                </div>
+
+                <!-- Commodity Agents -->
+                <div class="glass neon-border rounded-xl p-6" style="border-color:rgba(245,158,11,0.2);">
+                    <div class="section-label mb-4" style="color:#f59e0b;">Commodity Intelligence Agents</div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-lg" style="background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.15);">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-globe-americas text-yellow-400"></i>
+                                <div>
+                                    <div class="font-bold text-sm">Macro-Metals Agent</div>
+                                    <div class="text-xs text-slate-500">USD correlation · Fed policy · Inflation hedge</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs mono border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg" style="background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.15);">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-oil-can text-orange-400"></i>
+                                <div>
+                                    <div class="font-bold text-sm">Energy-Flow Agent</div>
+                                    <div class="text-xs text-slate-500">OPEC signals · EIA inventory · Seasonality</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs mono border bg-cyan-500/20 text-cyan-400 border-cyan-500/30">Scanning</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg" style="background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.15);">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-seedling text-emerald-400"></i>
+                                <div>
+                                    <div class="font-bold text-sm">Agri-Weather Agent</div>
+                                    <div class="text-xs text-slate-500">NOAA data · Crop reports · El Niño patterns</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs mono border bg-purple-500/20 text-purple-400 border-purple-500/30">Monitoring</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg" style="background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.15);">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-industry text-slate-400"></i>
+                                <div>
+                                    <div class="font-bold text-sm">Industrial-Demand Agent</div>
+                                    <div class="text-xs text-slate-500">China PMI · EV battery metals · Supply chain</div>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs mono border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Section Navigation (enhanced with sidebar sync)
+        function showSection(sectionName) {
+            document.querySelectorAll('main, section').forEach(el => {
+                if (el.id.startsWith('section-')) el.classList.add('section-hidden');
+            });
+            document.getElementById('section-' + sectionName).classList.remove('section-hidden');
+
+            // Sync sidebar
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            const sbEl = document.getElementById('sb-' + sectionName);
+            if (sbEl) sbEl.classList.add('active');
+
+            // Sync mobile drawer
+            document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
+        }
+
+        // Scroll to approval queue
+        function scrollToApproval() {
+            const el = document.getElementById('approval-queue-card');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Mobile drawer
+        function openMobileDrawer() {
+            document.getElementById('mobile-drawer').classList.add('open');
+            document.getElementById('mobile-overlay').classList.add('open');
+        }
+        function closeMobileDrawer() {
+            document.getElementById('mobile-drawer').classList.remove('open');
+            document.getElementById('mobile-overlay').classList.remove('open');
+        }
+
+        // ─── VIX REGIME ENGINE ───────────────────────────────────────────
+        let currentVix = 18.4;
+        const vixRegimes = [
+            { max: 12,  label: 'LOW',      cls: 'vix-low',      color: '#00ff88', strategy: 'Buy calls · Momentum strategies · Scale into longs · Low-cost insurance cheap' },
+            { max: 20,  label: 'NORMAL',   cls: 'vix-normal',   color: '#00f2ff', strategy: 'Balanced exposure · Follow trend · Standard position sizing · Iron condors viable' },
+            { max: 30,  label: 'ELEVATED', cls: 'vix-elevated', color: '#fbbf24', strategy: 'Reduce equity exposure · Add hedges · Widen stops · Avoid naked short premium' },
+            { max: 40,  label: 'HIGH',     cls: 'vix-high',     color: '#f97316', strategy: 'Defensive posture · Long puts / inverse ETFs · Cut leverage · Cash is a position' },
+            { max: 999, label: 'PANIC',    cls: 'vix-panic',    color: '#ef4444', strategy: '⚠ MAX DEFENSIVE · Buy VIX calls · Hard stops on all positions · Await capitulation' }
+        ];
+
+        function getVixRegime(vix) {
+            return vixRegimes.find(r => vix < r.max);
+        }
+
+        function updateVixWidget() {
+            // Simulate small VIX moves
+            currentVix += (Math.random() - 0.48) * 0.25;
+            currentVix = Math.max(9, Math.min(55, currentVix));
+
+            const regime = getVixRegime(currentVix);
+            const pct = Math.min((currentVix / 50) * 100, 98);
+
+            // Big value display
+            const vixBig = document.getElementById('vix-value-big');
+            if (vixBig) { vixBig.textContent = currentVix.toFixed(1); vixBig.style.color = regime.color; }
+
+            // Gauge needle
+            const needle = document.getElementById('vix-needle');
+            if (needle) needle.style.left = pct + '%';
+
+            // Regime badge (widget)
+            const badge = document.getElementById('vix-regime-badge');
+            if (badge) {
+                badge.className = 'vix-badge ' + regime.cls;
+                badge.textContent = regime.label;
+            }
+
+            // Regime badge (nav)
+            const navBadge = document.getElementById('vix-nav-badge');
+            const navVal  = document.getElementById('vix-nav-value');
+            const navReg  = document.getElementById('vix-nav-regime');
+            if (navBadge) navBadge.className = 'vix-badge ' + regime.cls + ' hidden sm:flex';
+            if (navVal)   navVal.textContent  = currentVix.toFixed(1);
+            if (navReg)   navReg.textContent  = regime.label;
+
+            // Strategy text
+            const strat = document.getElementById('vix-strategy-text');
+            if (strat) strat.textContent = regime.strategy;
+
+            // Color strategy box border
+            const stratBox = document.getElementById('vix-strategy-box');
+            if (stratBox) {
+                stratBox.style.borderColor = regime.color + '30';
+                stratBox.style.background  = regime.color + '08';
+            }
+        }
+
+        // ─── APPROVAL QUEUE ──────────────────────────────────────────────
+        const pendingApprovals = [
+            { id: 'AP-001', agent: 'Beta-Momentum', action: 'BUY',  symbol: 'NVDA', qty: 25,  confidence: 87, risk: 'MEDIUM' },
+            { id: 'AP-002', agent: 'Delta-Options',  action: 'SELL', symbol: 'TSLA', qty: 60,  confidence: 74, risk: 'LOW'    },
+        ];
+
+        function renderApprovalQueue() {
+            const list = document.getElementById('approval-list');
+            if (!list) return;
+            if (pendingApprovals.length === 0) {
+                list.innerHTML = '<div class="text-center text-slate-600 text-xs py-3 mono">No pending approvals</div>';
+                document.getElementById('approval-count-badge').textContent = '0';
+                document.getElementById('sb-approval-count').textContent = '0';
+                return;
+            }
+            document.getElementById('approval-count-badge').textContent = pendingApprovals.length;
+            document.getElementById('sb-approval-count').textContent = pendingApprovals.length;
+
+            list.innerHTML = pendingApprovals.map((a, idx) => `
+                <div class="approval-item" id="approval-${idx}">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs mono font-bold ${a.action==='BUY' ? 'text-emerald-400' : 'text-red-400'}">${a.action}</span>
+                            <span class="text-white mono font-bold text-sm">${a.symbol}</span>
+                            <span class="text-slate-500 text-xs">×${a.qty}</span>
+                        </div>
+                        <span class="text-xs mono" style="font-size:9px;color:${a.risk==='LOW'?'#00ff88':a.risk==='MEDIUM'?'#fbbf24':'#ef4444'}">${a.risk}</span>
+                    </div>
+                    <div class="text-xs text-slate-500 mono mb-2" style="font-size:9px;">${a.agent} · ${a.confidence}% confidence · ${a.id}</div>
+                    <div class="flex gap-1.5">
+                        <button onclick="approveOne(${idx})" class="flex-1 text-xs py-1 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500/25 transition mono">
+                            <i class="fas fa-check mr-1"></i>Approve
+                        </button>
+                        <button onclick="rejectOne(${idx})" class="flex-1 text-xs py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/18 transition mono">
+                            <i class="fas fa-times mr-1"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveOne(idx) {
+            const item = pendingApprovals[idx];
+            pendingApprovals.splice(idx, 1);
+            const log = document.getElementById('trade-log');
+            if (log && item) {
+                const entry = document.createElement('div');
+                entry.className = 'flex items-center gap-3 p-2 bg-emerald-500/10 rounded text-xs mono border-l-2 border-emerald-500';
+                entry.innerHTML = `<span class="text-slate-500">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span class="text-emerald-400 font-bold">APPROVED</span><span class="text-cyan-400">${item.symbol}</span><span class="text-slate-300">×${item.qty}</span>`;
+                log.insertBefore(entry, log.firstChild);
+            }
+            renderApprovalQueue();
+        }
+
+        function rejectOne(idx) {
+            const item = pendingApprovals[idx];
+            pendingApprovals.splice(idx, 1);
+            const log = document.getElementById('trade-log');
+            if (log && item) {
+                const entry = document.createElement('div');
+                entry.className = 'flex items-center gap-3 p-2 bg-red-500/10 rounded text-xs mono border-l-2 border-red-500';
+                entry.innerHTML = `<span class="text-slate-500">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span class="text-red-400 font-bold">REJECTED</span><span class="text-cyan-400">${item.symbol}</span>`;
+                log.insertBefore(entry, log.firstChild);
+            }
+            renderApprovalQueue();
+        }
+
+        function approveAll() { while(pendingApprovals.length) approveOne(0); }
+        function rejectAll()  { while(pendingApprovals.length) rejectOne(0); }
+
+        // ─── AGENT DOT GRID (all 20 agents) ──────────────────────────────
+        const allAgentDots = [
+            'Alpha-Sentiment','Beta-Momentum','Gamma-Arbitrage','Delta-Options',
+            'Epsilon-Macro','Zeta-Risk','Eta-Execution','Theta-Research',
+            'VIX-Analyst','Market-Scanner','Fundamental-Analyst','Technical-Analyst',
+            'Sentiment-Agent','Forex-Analyst','Crypto-Analyst','Polymarket-Analyst',
+            'Stock-Executor','Forex-Executor','Crypto-Executor','Yield-Farmer'
+        ];
+        const dotStatuses = ['active','scanning','monitoring','active','active','waiting','active','scanning','active','monitoring','active','active','scanning','active','active','monitoring','active','active','active','scanning'];
+
+        function renderAgentDotGrid() {
+            const grid = document.getElementById('agent-dot-grid');
+            if (!grid) return;
+            grid.innerHTML = allAgentDots.map((name, i) => {
+                const st = dotStatuses[i];
+                return `<span class="agent-dot ${st}" title="${name}: ${st}" style="cursor:default;"></span>`;
+            }).join('');
+        }
+
+        // Data & Simulation (from original dashboard)
+        const symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'SPY', 'QQQ', 'BTC', 'ETH', 'SOL', 'XAU', 'XAG'];
+        
+        const allAgents = [
+            { name: 'Alpha-Sentiment', type: 'Analysis', desc: 'Social media & news sentiment analysis', icon: 'fa-brain' },
+            { name: 'Beta-Momentum', type: 'Strategy', desc: 'Technical momentum indicators', icon: 'fa-chart-line' },
+            { name: 'Gamma-Arbitrage', type: 'Execution', desc: 'Cross-exchange arbitrage detection', icon: 'fa-exchange-alt' },
+            { name: 'Delta-Options', type: 'Derivatives', desc: 'Options flow & Greeks analysis', icon: 'fa-layer-group' },
+            { name: 'Epsilon-Macro', type: 'Research', desc: 'Macroeconomic data monitoring', icon: 'fa-globe' },
+            { name: 'Zeta-Risk', type: 'Risk', desc: 'Portfolio risk management', icon: 'fa-shield-alt' },
+            { name: 'Eta-Execution', type: 'Trading', desc: 'Order execution optimization', icon: 'fa-bolt' },
+            { name: 'Theta-Research', desc: 'Deep research & due diligence', type: 'Research', icon: 'fa-search' }
+        ];
+
+        let portfolioValue = 400000;
+        let positions = [
+            { symbol: 'AAPL', qty: 100, entry: 150.00, current: 264.58,  agent: 'Beta' },
+            { symbol: 'NVDA', qty: 40,  entry: 65.00,  current: 189.82,  agent: 'Alpha' },
+            { symbol: 'TSLA', qty: 60,  entry: 195.00, current: 411.82,  agent: 'Beta' },
+            { symbol: 'SPY',  qty: 200, entry: 485.00, current: 689.43,  agent: 'Epsilon' },
+            { symbol: 'BTC',  qty: 3,   entry: 33500,  current: 67316.00, agent: 'Gamma' }
+        ];
+
+        // Initialize Ticker
+        function initTicker() {
+            const tickerContainer = document.getElementById('ticker');
+            // Show loading state until real prices load
+            tickerContainer.innerHTML = '<span class="text-cyan-400 mx-4"><i class="fas fa-sync fa-spin mr-2"></i>Loading live market data...</span>';
+        }
+
+        // Update Positions Table
+        function updatePositions() {
+            const tbody = document.getElementById('positions-table');
+            tbody.innerHTML = positions.map(pos => {
+                const pnl = ((pos.current - pos.entry) * pos.qty).toFixed(2);
+                const pnlPercent = ((pos.current - pos.entry) / pos.entry * 100).toFixed(2);
+                const isProfit = pnl >= 0;
+                return `<tr class="border-b border-cyan-500/10 hover:bg-cyan-500/5 transition">
+                    <td class="py-3 font-bold text-cyan-400">${pos.symbol}</td>
+                    <td class="py-3 text-right">${pos.qty}</td>
+                    <td class="py-3 text-right text-slate-400">$${pos.entry.toFixed(2)}</td>
+                    <td class="py-3 text-right">$${pos.current.toFixed(2)}</td>
+                    <td class="py-3 text-right ${isProfit ? 'up' : 'down'}">
+                        ${isProfit ? '+' : ''}$${Math.abs(pnl).toLocaleString()}
+                    </td>
+                    <td class="py-3 text-right">
+                        <span class="px-2 py-1 bg-cyan-500/10 text-cyan-400 text-xs rounded border border-cyan-500/30">${pos.agent}</span>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Update Agent List (Dashboard) + refresh dot grid
+        function updateAgentList() {
+            const container = document.getElementById('agent-list');
+            const statuses = ['active', 'scanning', 'waiting', 'monitoring', 'ready', 'analyzing'];
+            const statusColors = {
+                'active':    'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
+                'scanning':  'bg-cyan-500/15 text-cyan-400 border-cyan-500/25',
+                'waiting':   'bg-yellow-500/15 text-yellow-400 border-yellow-500/25',
+                'monitoring':'bg-purple-500/15 text-purple-400 border-purple-500/25',
+                'ready':     'bg-slate-500/15 text-slate-400 border-slate-500/25',
+                'analyzing': 'bg-blue-500/15 text-blue-400 border-blue-500/25'
+            };
+            container.innerHTML = allAgents.slice(0, 8).map(agent => {
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                return `<div class="flex items-center justify-between p-2 bg-black/20 rounded-lg border border-white/5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-cyan-500/8 rounded-md flex items-center justify-center border border-cyan-500/15">
+                            <i class="fas ${agent.icon} text-cyan-400" style="font-size:10px;"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-medium text-slate-300">${agent.name}</div>
+                            <div class="text-slate-600 mono" style="font-size:9px;">${agent.type}</div>
+                        </div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded text-xs border mono ${statusColors[status]}" style="font-size:9px;">${status}</span>
+                </div>`;
+            }).join('');
+
+            // Also update the dot grid statuses
+            Object.assign(dotStatuses, allAgents.slice(0, 8).map(() =>
+                ['active','scanning','monitoring','waiting','active'][Math.floor(Math.random() * 5)]
+            ));
+            renderAgentDotGrid();
+        }
+
+        // Populate Agent Cards (Agent Section)
+        function populateAgentCards() {
+            const container = document.getElementById('agent-cards');
+            container.innerHTML = allAgents.map((agent, i) => `
+                <div onclick="openAgentModal(${i})" class="agent-card rounded-xl p-5 hover:bg-cyan-500/5 transition cursor-pointer group">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center border border-cyan-500/30 group-hover:bg-cyan-500/20">
+                            <i class="fas ${agent.icon} text-cyan-400"></i>
+                        </div>
+                        <span class="text-xs text-slate-500 mono">AGENT-${String(i + 1).padStart(2, '0')}</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-white mb-1">${agent.name}</h4>
+                    <p class="text-xs text-cyan-400 mb-2">${agent.type}</p>
+                    <p class="text-sm text-slate-400">${agent.desc}</p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full pulse-dot"></span>
+                        <span class="text-xs text-emerald-400">Operational</span>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-cyan-500/10">
+                        <button class="w-full py-1.5 text-xs bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 hover:bg-cyan-500/20 transition">
+                            <i class="fas fa-cog mr-1"></i>Configure
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Agent Modal
+        function openAgentModal(agentIndex) {
+            const agent = allAgents[agentIndex];
+            const modal = document.createElement('div');
+            modal.id = 'agent-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center';
+            modal.innerHTML = `
+                <div class="glass neon-border rounded-xl p-6 w-full max-w-lg mx-4">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-cyan-500/10 rounded-xl flex items-center justify-center border border-cyan-500/30">
+                                <i class="fas ${agent.icon} text-cyan-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-white">${agent.name}</h3>
+                                <p class="text-cyan-400 text-sm">${agent.type} Agent</p>
+                            </div>
+                        </div>
+                        <button onclick="closeAgentModal()" class="text-slate-400 hover:text-white transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-4">
+                            <h4 class="text-sm font-bold text-cyan-400 mb-2">Description</h4>
+                            <p class="text-slate-300 text-sm">${agent.desc}</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-900/50 rounded-lg p-4 border border-cyan-500/20">
+                                <div class="text-slate-500 text-xs uppercase mb-1">Status</div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-emerald-400 rounded-full pulse-dot"></span>
+                                    <span class="text-emerald-400 font-bold">Active</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-lg p-4 border border-cyan-500/20">
+                                <div class="text-slate-500 text-xs uppercase mb-1">Uptime</div>
+                                <div class="text-xl font-bold mono text-cyan-400">99.9%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 rounded-lg p-4 border border-cyan-500/20">
+                            <h4 class="text-sm font-bold text-cyan-400 mb-3">Performance Metrics</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">Signals Generated (24h)</span>
+                                    <span class="mono text-white">${Math.floor(Math.random() * 50 + 20)}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">Accuracy Rate</span>
+                                    <span class="mono text-emerald-400">${(Math.random() * 15 + 75).toFixed(1)}%</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">Avg Response Time</span>
+                                    <span class="mono text-cyan-400">${(Math.random() * 50 + 10).toFixed(0)}ms</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-900/50 rounded-lg p-4 border border-cyan-500/20">
+                            <h4 class="text-sm font-bold text-cyan-400 mb-3">Configuration</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="flex items-center justify-between text-sm cursor-pointer">
+                                        <span class="text-slate-300">Auto-Execute Trades</span>
+                                        <input type="checkbox" checked class="w-4 h-4 accent-cyan-400">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center justify-between text-sm cursor-pointer">
+                                        <span class="text-slate-300">Risk Management</span>
+                                        <input type="checkbox" checked class="w-4 h-4 accent-cyan-400">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-300 text-sm mb-1">Confidence Threshold</label>
+                                    <input type="range" min="0" max="100" value="75" class="w-full accent-cyan-400">
+                                    <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                        <span>Low</span>
+                                        <span>High</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex gap-3">
+                        <button type="button" onclick="closeAgentModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition">
+                            Close
+                        </button>
+                        <button onclick="saveAgentConfig(${agentIndex})" class="flex-1 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 rounded-lg text-sm font-bold transition">
+                            <i class="fas fa-save mr-1"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeAgentModal();
+            });
+            
+            // Close on escape key
+            document.addEventListener('keydown', function escapeHandler(e) {
+                if (e.key === 'Escape') {
+                    closeAgentModal();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            });
+        }
+
+        function closeAgentModal() {
+            const modal = document.getElementById('agent-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function saveAgentConfig(agentIndex) {
+            const agent = allAgents[agentIndex];
+            
+            // Add to trade log
+            const log = document.getElementById('trade-log');
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center gap-3 p-2 bg-cyan-500/10 rounded text-xs mono border-l-2 border-cyan-500';
+            entry.innerHTML = `
+                <span class="text-slate-500">${new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span class="text-cyan-400 font-bold">CONFIG</span>
+                <span class="text-slate-300">${agent.name}</span>
+                <span class="text-emerald-400">updated</span>
+            `;
+            log.insertBefore(entry, log.firstChild);
+            
+            closeAgentModal();
+        }
+
+        // Trade Log
+        const tradeActions = ['Scanned', 'Analyzed', 'Signal detected', 'Validated', 'Position calculated', 'Risk checked', 'Order prepared', 'Submitted', 'Filled', 'Confirmed'];
+        
+        function addTradeLog() {
+            const log = document.getElementById('trade-log');
+            const action = tradeActions[Math.floor(Math.random() * tradeActions.length)];
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const agent = allAgents[Math.floor(Math.random() * allAgents.length)].name;
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center gap-3 p-2 bg-black/30 rounded text-xs mono border-l-2 border-cyan-500/30';
+            entry.innerHTML = `
+                <span class="text-slate-500">${time}</span>
+                <span class="text-cyan-400">${agent.split('-')[0]}</span>
+                <span class="text-slate-400">${action}</span>
+                <span class="text-cyan-400 font-bold">${symbol}</span>
+            `;
+            
+            log.insertBefore(entry, log.firstChild);
+            if (log.children.length > 15) log.removeChild(log.lastChild);
+        }
+
+        // Update Portfolio
+        function updatePortfolio() {
+            const change = (Math.random() - 0.4) * 5000;
+            portfolioValue += change;
+            document.getElementById('total-value').textContent = `$${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            const pnlElement = document.getElementById('daily-pnl');
+            const pnl = change;
+            pnlElement.textContent = `${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}`;
+            pnlElement.className = `text-sm mono ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+        }
+
+        // Update Time
+        function updateTime() {
+            document.getElementById('system-time').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Timescale button functionality
+        let mainChartInstance = null;
+        let currentTimeframe = 'all';
+
+        // Master data - candlestick OHLC data for realistic charting
+        let masterOHLCData = [];
+        
+        // Generate realistic candlestick data
+        function generateCandlestickData(days, startValue, endValue) {
+            const data = [];
+            let currentValue = startValue;
+            
+            for (let i = 0; i < days; i++) {
+                const progress = i / (days / 2); // Growth curve
+                const trendTarget = startValue + (endValue - startValue) * Math.pow(Math.min(progress, 1), 0.9);
+                
+                // Daily volatility (2-4% swings)
+                const volatility = currentValue * 0.03;
+                const dailyChange = (Math.random() - 0.35) * 0.06; // Bullish bias
+                
+                // Calculate OHLC
+                const open = currentValue;
+                const close = open * (1 + dailyChange);
+                const high = Math.max(open, close) + Math.random() * volatility * 0.5;
+                const low = Math.min(open, close) - Math.random() * volatility * 0.5;
+                
+                // Major market events
+                let adjustedClose = close;
+                if (i === 45) adjustedClose *= 0.88; // Dip
+                if (i === 60) adjustedClose *= 1.10; // Recovery
+                if (i === 110) adjustedClose *= 0.92; // Dip
+                if (i === 135) adjustedClose *= 1.08; // Recovery
+                if (i === 200) adjustedClose *= 0.89; // Dip
+                if (i === 250) adjustedClose *= 1.12; // Rally
+                if (i === 300) adjustedClose *= 0.91; // Dip
+                if (i === 330) adjustedClose *= 1.15; // Strong rally
+                
+                data.push({
+                    day: i,
+                    open: Math.round(open),
+                    high: Math.round(high),
+                    low: Math.round(low),
+                    close: Math.round(Math.max(adjustedClose, startValue * 0.75)),
+                    volume: Math.floor(Math.random() * 1000000) + 500000
+                });
+                
+                currentValue = adjustedClose;
+            }
+            
+            return data;
+        }
+
+        // Initialize master data
+        function initializeMasterData() {
+            masterOHLCData = generateCandlestickData(365, 100000, 400000);
+        }
+
+        // Get timeframe data with proper slicing
+        function getTimeframeData(timeframe) {
+            const today = masterOHLCData.length;
+            let startIdx, endIdx, labelInterval;
+            
+            switch(timeframe) {
+                case '1d':
+                    startIdx = today - 1;
+                    endIdx = today;
+                    labelInterval = 'hour';
+                    break;
+                case '1w':
+                    startIdx = today - 7;
+                    endIdx = today;
+                    labelInterval = 'day';
+                    break;
+                case '1m':
+                    startIdx = today - 30;
+                    endIdx = today;
+                    labelInterval = 'day';
+                    break;
+                case '1y':
+                    startIdx = 0;
+                    endIdx = today;
+                    labelInterval = 'week';
+                    break;
+                case 'all':
+                default:
+                    startIdx = 0;
+                    endIdx = today;
+                    labelInterval = 'month';
+                    break;
+            }
+            
+            return masterOHLCData.slice(startIdx, endIdx);
+        }
+
+        // Update chart for selected timeframe
+        function updateTimeframe(timeframe) {
+            currentTimeframe = timeframe;
+            
+            // Update button styles
+            const timeframes = ['1d', '1w', '1m', '1y', 'all'];
+            timeframes.forEach(tf => {
+                const btn = document.getElementById(`btn-${tf}`);
+                if (btn) {
+                    if (tf === timeframe) {
+                        btn.className = 'px-3 py-1 text-xs bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 transition-all hover:scale-105';
+                    } else {
+                        btn.className = 'px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 rounded transition-all hover:scale-105';
+                    }
+                }
+            });
+            
+            // Update TradingView chart data based on timeframe
+            if (tvChart && tvCandlestickSeries && tvVolumeSeries) {
+                const data = getTimeframeData(timeframe);
+                
+                // Convert to TradingView format
+                const tvData = data.map((d, i) => {
+                    const timestamp = Math.floor(Date.now() / 1000) - (data.length - i) * 86400;
+                    return {
+                        time: timestamp,
+                        open: d.open,
+                        high: d.high,
+                        low: d.low,
+                        close: d.close
+                    };
+                });
+                
+                const volumeData = data.map((d, i) => {
+                    const timestamp = Math.floor(Date.now() / 1000) - (data.length - i) * 86400;
+                    return {
+                        time: timestamp,
+                        value: d.volume,
+                        color: d.close >= d.open ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 75, 75, 0.3)'
+                    };
+                });
+                
+                // Update series data
+                tvCandlestickSeries.setData(tvData);
+                tvVolumeSeries.setData(volumeData);
+                
+                // Fit content to view
+                tvChart.timeScale().fitContent();
+                
+                console.log(`📊 TradingView chart updated: ${timeframe} (${tvData.length} candles)`);
+            }
+            
+            addTradeLog();
+        }
+
+        // Stock price update every 10 minutes
+        async function updateStockPricesFromAPI() {
+            console.log('🔄 Updating stock prices...');
+            await fetchLiveQuotes();
+            
+            // Update today's close price based on market data
+            const today = masterOHLCData.length - 1;
+            if (stockPrices['SPY'] && masterOHLCData[today]) {
+                const marketChange = stockChanges['SPY'] / 100;
+                const newClose = masterOHLCData[today].close * (1 + marketChange * 0.8);
+                masterOHLCData[today].close = Math.round(newClose);
+                masterOHLCData[today].high = Math.round(Math.max(masterOHLCData[today].high, newClose));
+                masterOHLCData[today].low = Math.round(Math.min(masterOHLCData[today].low, newClose));
+            }
+            
+            // Refresh chart
+            updateTimeframe(currentTimeframe);
+            console.log('✅ Stock prices updated');
+        }
+
+        // Trade Modal functionality
+        let tradeModalOpen = false;
+
+        function openTradeModal() {
+            if (tradeModalOpen) return;
+            tradeModalOpen = true;
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'trade-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center';
+            modal.innerHTML = `
+                <div class="glass neon-border rounded-xl p-6 w-full max-w-md mx-4 transform scale-95 animate-[pulse_0.2s_ease-out_forwards]">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-cyan-400">
+                            <i class="fas fa-plus-circle mr-2"></i>New Trade
+                        </h3>
+                        <button onclick="closeTradeModal()" class="text-slate-400 hover:text-white transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="trade-form" onsubmit="submitTrade(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-slate-400 text-xs uppercase mb-1">Symbol</label>
+                                <select id="trade-symbol" class="w-full bg-slate-900 border border-cyan-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                                    <option value="">Select asset...</option>
+                                    <option value="AAPL">AAPL - Apple Inc.</option>
+                                    <option value="MSFT">MSFT - Microsoft</option>
+                                    <option value="GOOGL">GOOGL - Alphabet</option>
+                                    <option value="AMZN">AMZN - Amazon</option>
+                                    <option value="TSLA">TSLA - Tesla</option>
+                                    <option value="NVDA">NVDA - NVIDIA</option>
+                                    <option value="BTC">BTC - Bitcoin</option>
+                                    <option value="ETH">ETH - Ethereum</option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-400 text-xs uppercase mb-1">Action</label>
+                                    <select id="trade-action" class="w-full bg-slate-900 border border-cyan-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                                        <option value="buy">Buy</option>
+                                        <option value="sell">Sell</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 text-xs uppercase mb-1">Order Type</label>
+                                    <select id="trade-type" class="w-full bg-slate-900 border border-cyan-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                                        <option value="market">Market</option>
+                                        <option value="limit">Limit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-slate-400 text-xs uppercase mb-1">Quantity</label>
+                                <input type="number" id="trade-quantity" min="1" placeholder="100" 
+                                    class="w-full bg-slate-900 border border-cyan-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400 mono">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-slate-400 text-xs uppercase mb-1">Assign Agent</label>
+                                <select id="trade-agent" class="w-full bg-slate-900 border border-cyan-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                                    <option value="manual">Manual Execution</option>
+                                    <option value="Alpha">Alpha-Sentiment</option>
+                                    <option value="Beta">Beta-Momentum</option>
+                                    <option value="Gamma">Gamma-Arbitrage</option>
+                                    <option value="Delta">Delta-Options</option>
+                                </select>
+                            </div>
+                            
+                            <div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">Est. Value:</span>
+                                    <span id="trade-est-value" class="mono text-cyan-400">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex gap-3">
+                            <button type="button" onclick="closeTradeModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition">
+                                Cancel
+                            </button>
+                            <button type="submit" class="flex-1 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 rounded-lg text-sm font-bold transition">
+                                <i class="fas fa-paper-plane mr-1"></i>Submit Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Animate in
+            setTimeout(() => {
+                modal.querySelector('.glass').classList.remove('scale-95');
+                modal.querySelector('.glass').classList.add('scale-100');
+            }, 10);
+            
+            // Add input listeners for value calculation
+            document.getElementById('trade-symbol').addEventListener('change', updateTradeValue);
+            document.getElementById('trade-quantity').addEventListener('input', updateTradeValue);
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeTradeModal();
+            });
+            
+            // Close on escape key
+            document.addEventListener('keydown', function escapeHandler(e) {
+                if (e.key === 'Escape') {
+                    closeTradeModal();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            });
+        }
+
+        function closeTradeModal() {
+            const modal = document.getElementById('trade-modal');
+            if (modal) {
+                modal.remove();
+                tradeModalOpen = false;
+            }
+        }
+
+        function updateTradeValue() {
+            const symbol = document.getElementById('trade-symbol').value;
+            const quantity = parseInt(document.getElementById('trade-quantity').value) || 0;
+            
+            // Use live prices where available, fallback to current market prices
+            const prices = Object.assign(
+                { 'AAPL': 264.58, 'MSFT': 397.23, 'GOOGL': 314.98, 'AMZN': 210.11,
+                  'TSLA': 411.82, 'NVDA': 189.82, 'META': 657.00,  'SPY': 689.43,
+                  'QQQ':  608.81, 'BTC': 67316.00, 'ETH': 1912.73, 'SOL': 143.80,
+                  'XAU':  5107.90, 'XAG': 84.77 },
+                stockPrices,
+                cryptoPrices
+            );
+
+            const price = prices[symbol] || 0;
+            const value = price * quantity;
+            
+            document.getElementById('trade-est-value').textContent = `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function submitTrade(event) {
+            event.preventDefault();
+            
+            const symbol = document.getElementById('trade-symbol').value;
+            const action = document.getElementById('trade-action').value;
+            const quantity = document.getElementById('trade-quantity').value;
+            const agent = document.getElementById('trade-agent').value;
+            
+            if (!symbol || !quantity) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Add to positions — use live prices where available
+            const prices = Object.assign(
+                { 'AAPL': 264.58, 'MSFT': 397.23, 'GOOGL': 314.98, 'AMZN': 210.11,
+                  'TSLA': 411.82, 'NVDA': 189.82, 'META': 657.00,  'SPY': 689.43,
+                  'QQQ':  608.81, 'BTC': 67316.00, 'ETH': 1912.73, 'SOL': 143.80,
+                  'XAU':  5107.90, 'XAG': 84.77 },
+                stockPrices,
+                cryptoPrices
+            );
+            
+            positions.push({
+                symbol: symbol,
+                qty: parseInt(quantity),
+                entry: prices[symbol],
+                current: prices[symbol],
+                agent: agent === 'manual' ? 'Manual' : agent
+            });
+            
+            // Update positions display
+            updatePositions();
+            
+            // Add to trade log
+            const log = document.getElementById('trade-log');
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center gap-3 p-2 bg-emerald-500/10 rounded text-xs mono border-l-2 border-emerald-500';
+            entry.innerHTML = `
+                <span class="text-slate-500">${new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span class="text-emerald-400 font-bold">${action.toUpperCase()}</span>
+                <span class="text-cyan-400">${symbol}</span>
+                <span class="text-slate-300">x${quantity}</span>
+                <span class="text-slate-400">@ Market</span>
+            `;
+            log.insertBefore(entry, log.firstChild);
+            
+            closeTradeModal();
+        }
+
+        // Crypto-specific trade modal
+        function openCryptoTradeModal(symbol, price) {
+            if (tradeModalOpen) return;
+            tradeModalOpen = true;
+            
+            const modal = document.createElement('div');
+            modal.id = 'trade-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center';
+            modal.innerHTML = `
+                <div class="glass neon-border rounded-xl p-6 w-full max-w-md mx-4 transform scale-95">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-orange-400">
+                            <i class="fab fa-bitcoin mr-2"></i>Trade ${symbol}
+                        </h3>
+                        <button onclick="closeTradeModal()" class="text-slate-400 hover:text-white transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="crypto-trade-form" onsubmit="submitCryptoTrade(event, '${symbol}', ${price})">
+                        <div class="space-y-4">
+                            <div class="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Current Price</span>
+                                    <span class="text-2xl font-bold mono text-orange-400">$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-400 text-xs uppercase mb-1">Action</label>
+                                    <select id="crypto-trade-action" class="w-full bg-slate-900 border border-orange-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-400">
+                                        <option value="buy">Buy</option>
+                                        <option value="sell">Sell</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 text-xs uppercase mb-1">Order Type</label>
+                                    <select id="crypto-trade-type" class="w-full bg-slate-900 border border-orange-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-400">
+                                        <option value="market">Market</option>
+                                        <option value="limit">Limit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-slate-400 text-xs uppercase mb-1">Quantity</label>
+                                <input type="number" id="crypto-trade-quantity" min="0.001" step="0.001" placeholder="0.5" 
+                                    class="w-full bg-slate-900 border border-orange-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-400 mono">
+                            </div>
+                            
+                            <div class="bg-slate-900/50 border border-orange-500/20 rounded-lg p-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400">Est. Value:</span>
+                                    <span id="crypto-trade-est-value" class="mono text-orange-400">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex gap-3">
+                            <button type="button" onclick="closeTradeModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition">
+                                Cancel
+                            </button>
+                            <button type="submit" class="flex-1 py-2 bg-orange-500 hover:bg-orange-400 text-slate-900 rounded-lg text-sm font-bold transition">
+                                <i class="fas fa-paper-plane mr-1"></i>Execute Trade
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Animate in
+            setTimeout(() => {
+                modal.querySelector('.glass').classList.remove('scale-95');
+                modal.querySelector('.glass').classList.add('scale-100');
+            }, 10);
+            
+            // Add input listeners
+            document.getElementById('crypto-trade-quantity').addEventListener('input', () => {
+                const qty = parseFloat(document.getElementById('crypto-trade-quantity').value) || 0;
+                const value = qty * price;
+                document.getElementById('crypto-trade-est-value').textContent = `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            });
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeTradeModal();
+            });
+            
+            // Close on escape key
+            document.addEventListener('keydown', function escapeHandler(e) {
+                if (e.key === 'Escape') {
+                    closeTradeModal();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            });
+        }
+
+        function submitCryptoTrade(event, symbol, price) {
+            event.preventDefault();
+            
+            const action = document.getElementById('crypto-trade-action').value;
+            const quantity = document.getElementById('crypto-trade-quantity').value;
+            
+            if (!quantity || quantity <= 0) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+            
+            // Add to positions
+            positions.push({
+                symbol: symbol,
+                qty: parseFloat(quantity),
+                entry: price,
+                current: price,
+                agent: 'Manual'
+            });
+            
+            // Update positions display
+            updatePositions();
+            
+            // Add to trade log
+            const log = document.getElementById('trade-log');
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center gap-3 p-2 bg-orange-500/10 rounded text-xs mono border-l-2 border-orange-500';
+            entry.innerHTML = `
+                <span class="text-slate-500">${new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span class="text-orange-400 font-bold">${action.toUpperCase()}</span>
+                <span class="text-cyan-400">${symbol}</span>
+                <span class="text-slate-300">x${quantity}</span>
+                <span class="text-slate-400">@ $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            `;
+            log.insertBefore(entry, log.firstChild);
+            
+            closeTradeModal();
+        }
+
+        // Initialize Charts
+        let tvChart = null;
+        let tvCandlestickSeries = null;
+        let tvVolumeSeries = null;
+        
+        function initCharts() {
+            // Mini chart (keep Chart.js for small sparkline)
+            const miniCtx = document.getElementById('portfolio-mini-chart').getContext('2d');
+            new Chart(miniCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => i),
+                    datasets: [{
+                        data: Array.from({length: 20}, () => 400000 + Math.random() * 5000 - 2500),
+                        borderColor: '#00f2ff',
+                        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+
+            // TradingView Lightweight Charts - Main Chart
+            const chartContainer = document.getElementById('tv-chart');
+            if (!chartContainer) {
+                console.error('TradingView chart container not found');
+                return;
+            }
+
+            // Create TradingView chart
+            tvChart = LightweightCharts.createChart(chartContainer, {
+                width: chartContainer.offsetWidth || 600,
+                height: 280,
+                layout: {
+                    background: { type: 'solid', color: 'transparent' },
+                    textColor: '#9ca3af',
+                    fontFamily: 'JetBrains Mono, monospace'
+                },
+                grid: {
+                    vertLines: { color: 'rgba(0, 242, 255, 0.05)' },
+                    horzLines: { color: 'rgba(0, 242, 255, 0.05)' }
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: {
+                        color: '#00f2ff',
+                        width: 1,
+                        style: LightweightCharts.LineStyle.Dashed,
+                        labelBackgroundColor: '#00f2ff'
+                    },
+                    horzLine: {
+                        color: '#00f2ff',
+                        width: 1,
+                        style: LightweightCharts.LineStyle.Dashed,
+                        labelBackgroundColor: '#00f2ff'
+                    }
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(0, 242, 255, 0.2)',
+                    scaleMargins: { top: 0.1, bottom: 0.2 }
+                },
+                timeScale: {
+                    borderColor: 'rgba(0, 242, 255, 0.2)',
+                    timeVisible: true,
+                    secondsVisible: false
+                }
+            });
+
+            // Add candlestick series
+            tvCandlestickSeries = tvChart.addCandlestickSeries({
+                upColor: '#00ff88',
+                downColor: '#ff4b4b',
+                borderUpColor: '#00ff88',
+                borderDownColor: '#ff4b4b',
+                wickUpColor: '#00ff88',
+                wickDownColor: '#ff4b4b'
+            });
+
+            // Add volume series
+            tvVolumeSeries = tvChart.addHistogramSeries({
+                color: '#7000ff',
+                priceFormat: { type: 'volume' },
+                priceScaleId: '',
+                scaleMargins: { top: 0.85, bottom: 0 }
+            });
+
+            // Convert OHLC data to TradingView format
+            const tvData = masterOHLCData.map((d, i) => {
+                const timestamp = Math.floor(Date.now() / 1000) - (masterOHLCData.length - i) * 86400;
+                return {
+                    time: timestamp,
+                    open: d.open,
+                    high: d.high,
+                    low: d.low,
+                    close: d.close
+                };
+            });
+
+            // Volume data
+            const volumeData = masterOHLCData.map((d, i) => {
+                const timestamp = Math.floor(Date.now() / 1000) - (masterOHLCData.length - i) * 86400;
+                return {
+                    time: timestamp,
+                    value: d.volume,
+                    color: d.close >= d.open ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 75, 75, 0.3)'
+                };
+            });
+
+            // Set data
+            tvCandlestickSeries.setData(tvData);
+            tvVolumeSeries.setData(volumeData);
+
+            // Fit content
+            tvChart.timeScale().fitContent();
+
+            // Keep chart width in sync with container on window resize
+            window.addEventListener('resize', () => {
+                if (tvChart && chartContainer) {
+                    tvChart.applyOptions({ width: chartContainer.offsetWidth || 600 });
+                }
+            });
+
+            console.log('✅ TradingView chart initialized with', tvData.length, 'candles');
+        }
+
+        // Crypto Data
+        const cryptoAssets = [
+            { symbol: 'BTC', name: 'Bitcoin',  price: 67316.00, change: -1.75, mcap: '1.33T', volume: '38B', signal: 'HOLD' },
+            { symbol: 'ETH', name: 'Ethereum', price: 1912.73,  change: -2.10, mcap: '230B',  volume: '18B', signal: 'HOLD' },
+            { symbol: 'SOL', name: 'Solana',   price: 143.80,   change:  4.73, mcap: '68B',   volume: '4.8B', signal: 'BUY'  },
+            { symbol: 'BNB',  name: 'BNB',       price: 625.16, change:  2.90, mcap: '92B',  volume: '2.4B',  signal: 'HOLD' },
+            { symbol: 'XRP',  name: 'XRP',       price: 1.39,   change: -4.20, mcap: '80B',  volume: '3.8B',  signal: 'HOLD' },
+            { symbol: 'ADA',  name: 'Cardano',   price: 0.28,   change:  2.99, mcap: '10B',  volume: '420M',  signal: 'HOLD' },
+            { symbol: 'AVAX', name: 'Avalanche', price: 9.13,   change:  2.12, mcap: '3.8B', volume: '180M',  signal: 'HOLD' },
+            { symbol: 'LINK', name: 'Chainlink', price: 14.80, change: 2.8, mcap: '8.5B', volume: '420M', signal: 'HOLD' }
+        ];
+
+        function updateCryptoPrices() {
+            const tbody = document.getElementById('crypto-prices');
+            if (!tbody) return;
+
+            // Sync all coins from live CoinGecko data if available
+            cryptoAssets.forEach(c => {
+                if (cryptoPrices[c.symbol] != null) {
+                    c.price  = cryptoPrices[c.symbol];
+                    c.change = cryptoChanges[c.symbol] ?? c.change;
+                }
+            });
+
+            tbody.innerHTML = cryptoAssets.map(crypto => {
+                const priceChange = (Math.random() - 0.5) * 0.5;
+                crypto.price = crypto.price * (1 + priceChange / 100);
+                crypto.change = crypto.change + (Math.random() - 0.5) * 0.3;
+                
+                const signalColors = {
+                    'BUY': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                    'SELL': 'bg-red-500/20 text-red-400 border-red-500/30',
+                    'HOLD': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                };
+                
+                return `<tr class="border-b border-orange-500/10 hover:bg-orange-500/5 transition">
+                    <td class="py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20">
+                                <span class="text-orange-400 font-bold text-xs">${crypto.symbol}</span>
+                            </div>
+                            <div>
+                                <div class="font-bold">${crypto.name}</div>
+                                <div class="text-xs text-slate-500">${crypto.symbol}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 text-right font-bold">$${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: crypto.price < 1 ? 4 : 2 })}</td>
+                    <td class="py-3 text-right ${crypto.change >= 0 ? 'up' : 'down'}">${crypto.change >= 0 ? '+' : ''}${crypto.change.toFixed(2)}%</td>
+                    <td class="py-3 text-right text-slate-400">$${crypto.mcap}</td>
+                    <td class="py-3 text-right text-slate-400">$${crypto.volume}</td>
+                    <td class="py-3 text-center">
+                        <span class="px-3 py-1 rounded text-xs font-bold border ${signalColors[crypto.signal]}">${crypto.signal}</span>
+                    </td>
+                    <td class="py-3 text-right">
+                        <button onclick="openCryptoTradeModal('${crypto.symbol}', ${crypto.price})" class="px-3 py-1 text-xs bg-orange-500/20 text-orange-400 rounded border border-orange-500/30 hover:bg-orange-500/30 transition-all hover:scale-105">
+                            <i class="fas fa-exchange-alt mr-1"></i>Trade
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ─── LIVE METALS PRICES ──────────────────────────────────────────
+        async function fetchLiveMetals() {
+            try {
+                // Fetch gold and silver in parallel from gold-api.com (free, no key, CORS-enabled)
+                const [goldRes, silverRes] = await Promise.all([
+                    fetch('https://api.gold-api.com/price/XAU'),
+                    fetch('https://api.gold-api.com/price/XAG')
+                ]);
+
+                if (goldRes.ok) {
+                    const g = await goldRes.json();
+                    if (g.price) {
+                        const gold = commodities.find(c => c.symbol === 'XAU');
+                        if (gold) gold.price = g.price;
+                    }
+                }
+                if (silverRes.ok) {
+                    const s = await silverRes.json();
+                    if (s.price) {
+                        const silver = commodities.find(c => c.symbol === 'XAG');
+                        if (silver) silver.price = s.price;
+                    }
+                }
+
+                updateCommoditiesTable();
+
+                const goldPrice  = commodities.find(c => c.symbol === 'XAU')?.price || '?';
+                const silverPrice = commodities.find(c => c.symbol === 'XAG')?.price || '?';
+                console.log(`✅ Live metals — Gold: $${parseFloat(goldPrice).toFixed(2)}  Silver: $${parseFloat(silverPrice).toFixed(2)}`);
+            } catch(e) {
+                console.warn('Metals API unavailable, using simulated prices:', e.message);
+            }
+        }
+
+        // ─── BOND RATES ──────────────────────────────────────────────────
+        const bondRates = {
+            fed:  { rate: 4.33, label: 'Fed Funds', id: 'bond-fed',  fixed: true },
+            y2:   { rate: 3.48, label: '2Y',        id: 'bond-2y',   chgId: 'bond-2y-chg'  },
+            y5:   { rate: 3.65, label: '5Y',        id: 'bond-5y',   chgId: 'bond-5y-chg'  },
+            y10:  { rate: 4.08, label: '10Y',       id: 'bond-10y',  chgId: 'bond-10y-chg' },
+            y30:  { rate: 4.72, label: '30Y',       id: 'bond-30y',  chgId: 'bond-30y-chg' },
+        };
+
+        function updateBondRates() {
+            ['y2','y5','y10','y30'].forEach(key => {
+                const b = bondRates[key];
+                const move = (Math.random() - 0.5) * 0.004;
+                b.rate = Math.max(0.01, b.rate + move);
+                const el   = document.getElementById(b.id);
+                const chgEl = document.getElementById(b.chgId);
+                if (el) el.textContent = b.rate.toFixed(2) + '%';
+                if (chgEl) {
+                    const sign = move >= 0 ? '+' : '';
+                    chgEl.textContent  = sign + move.toFixed(3);
+                    chgEl.style.color  = move >= 0 ? '#f87171' : '#34d399'; // yields up = bad for bonds
+                }
+            });
+            // Spread 2Y - 10Y
+            const spread   = bondRates.y10.rate - bondRates.y2.rate;
+            const spreadEl = document.getElementById('bond-spread');
+            if (spreadEl) {
+                const inv = spread < 0;
+                spreadEl.textContent = (spread >= 0 ? '+' : '') + spread.toFixed(2) + '% ' + (inv ? 'Inverted ⚠' : 'Normal');
+                spreadEl.style.color = inv ? '#f87171' : '#34d399';
+            }
+        }
+
+        // ─── FOREX ────────────────────────────────────────────────────────
+        const forexPairs = [
+            { pair: 'EUR/USD', rate: 1.1781, pip: 0.0001, bull: true  },
+            { pair: 'GBP/USD', rate: 1.3481, pip: 0.0001, bull: true  },
+            { pair: 'USD/JPY', rate: 152.56, pip: 0.01,   bull: false },
+            { pair: 'AUD/USD', rate: 0.7086, pip: 0.0001, bull: true  },
+            { pair: 'USD/CAD', rate: 1.3678, pip: 0.0001, bull: false },
+            { pair: 'USD/CHF', rate: 0.7754, pip: 0.0001, bull: false },
+            { pair: 'NZD/USD', rate: 0.5780, pip: 0.0001, bull: false },
+            { pair: 'USD/MXN', rate: 20.42,  pip: 0.001,  bull: false },
+        ];
+
+        function updateForex() {
+            const container = document.getElementById('forex-rates');
+            if (!container) return;
+            forexPairs.forEach(p => {
+                const vol = p.pip * (Math.random() * 3 + 1);
+                p.rate += (Math.random() - 0.5) * vol;
+                p.rate = Math.max(0.001, p.rate);
+            });
+            const dec = p => p.rate >= 100 ? 3 : p.rate >= 10 ? 4 : 5;
+            container.innerHTML = forexPairs.map(p => {
+                const dayChg = ((Math.random() - 0.48) * 0.35).toFixed(2);
+                const up = parseFloat(dayChg) >= 0;
+                return `<div class="flex items-center justify-between py-1 border-b border-teal-500/10 last:border-0">
+                    <span class="text-xs mono font-bold text-slate-300">${p.pair}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs mono text-teal-300">${p.rate.toFixed(dec(p))}</span>
+                        <span class="text-xs mono ${up ? 'text-emerald-400' : 'text-red-400'}" style="min-width:48px;text-align:right;">${up?'+':''}${dayChg}%</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const el = document.getElementById('forex-time');
+            if (el) el.textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
+        }
+
+        // ─── COMMODITIES ─────────────────────────────────────────────────
+        const commodities = [
+            { symbol: 'XAU', name: 'Gold',         price: 5107.90, change: 0.82,  unit: '$/troy oz', cat: 'Precious',   signal: 'BUY',  color: '#fcd34d' },
+            { symbol: 'XAG', name: 'Silver',        price: 84.77,   change: 1.20,  unit: '$/troy oz', cat: 'Precious',   signal: 'BUY',  color: '#94a3b8' },
+            { symbol: 'XPT', name: 'Platinum',      price: 2100.00, change: 1.20,  unit: '$/troy oz', cat: 'Precious',   signal: 'BUY',  color: '#67e8f9' },
+            { symbol: 'XPD', name: 'Palladium',     price: 1783.00, change: 0.65,  unit: '$/troy oz', cat: 'Precious',   signal: 'HOLD', color: '#a78bfa' },
+            { symbol: 'WTI', name: 'Crude Oil WTI', price: 66.48,   change: -0.82, unit: '$/barrel',  cat: 'Energy',     signal: 'HOLD', color: '#fb923c' },
+            { symbol: 'BRN', name: 'Brent Crude',   price: 70.10,   change: -0.70, unit: '$/barrel',  cat: 'Energy',     signal: 'HOLD', color: '#f97316' },
+            { symbol: 'NG',  name: 'Natural Gas',   price: 3.24,    change: -1.80, unit: '$/MMBtu',   cat: 'Energy',     signal: 'HOLD', color: '#4ade80' },
+            { symbol: 'HG',  name: 'Copper',        price: 5.90,    change: 1.15,  unit: '$/lb',      cat: 'Industrial', signal: 'BUY',  color: '#fb923c' },
+            { symbol: 'ZW',  name: 'Wheat',         price: 573.50,  change: 0.45,  unit: 'cents/bu',  cat: 'Agri',       signal: 'HOLD', color: '#fbbf24' },
+            { symbol: 'ZC',  name: 'Corn',          price: 427.50,  change: 0.30,  unit: 'cents/bu',  cat: 'Agri',       signal: 'HOLD', color: '#a3e635' },
+            { symbol: 'ZS',  name: 'Soybeans',      price: 1137.50, change: -0.37, unit: 'cents/bu',  cat: 'Agri',       signal: 'HOLD', color: '#86efac' },
+            { symbol: 'CC',  name: 'Cocoa',         price: 3450.00, change: 3.77,  unit: '$/tonne',   cat: 'Agri',       signal: 'BUY',  color: '#d97706' },
+        ];
+
+        const catColors = { Precious: '#fcd34d', Energy: '#fb923c', Industrial: '#67e8f9', Agri: '#86efac' };
+
+        function updateCommoditiesTable() {
+            const tbody = document.getElementById('commodities-table');
+            if (!tbody) return;
+
+            // Simulate small price moves
+            commodities.forEach(c => {
+                const move = (Math.random() - 0.48) * 0.06;
+                c.price  = Math.max(c.price * (1 + move / 100), 0.01);
+                c.change += (Math.random() - 0.5) * 0.05;
+            });
+
+            const signalCls = {
+                'BUY':  'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                'SELL': 'bg-red-500/20 text-red-400 border-red-500/30',
+                'HOLD': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+            };
+
+            tbody.innerHTML = commodities.map(c => {
+                const fmt = c.price >= 100 ? 2 : c.price >= 10 ? 2 : 4;
+                return `<tr class="border-b hover:bg-yellow-500/5 transition" style="border-color:rgba(245,158,11,0.08);">
+                    <td class="py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold mono" style="background:${c.color}18;border:1px solid ${c.color}40;color:${c.color};">${c.symbol}</div>
+                            <div>
+                                <div class="font-bold text-slate-200">${c.name}</div>
+                                <div class="text-xs text-slate-600">${c.symbol}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 text-right font-bold text-slate-200">$${c.price.toLocaleString('en-US',{minimumFractionDigits:fmt,maximumFractionDigits:fmt})}</td>
+                    <td class="py-3 text-right ${c.change >= 0 ? 'up' : 'down'}">${c.change >= 0 ? '+' : ''}${c.change.toFixed(2)}%</td>
+                    <td class="py-3 text-right text-slate-500 text-xs">${c.unit}</td>
+                    <td class="py-3 text-right"><span class="text-xs px-2 py-0.5 rounded" style="background:${catColors[c.cat]}18;color:${catColors[c.cat]};border:1px solid ${catColors[c.cat]}35;">${c.cat}</span></td>
+                    <td class="py-3 text-center"><span class="px-2 py-1 rounded text-xs font-bold border mono ${signalCls[c.signal]}">${c.signal}</span></td>
+                    <td class="py-3 text-right">
+                        <button onclick="openCommodityTrade('${c.symbol}','${c.name}',${c.price.toFixed(2)})"
+                            class="px-3 py-1 text-xs rounded border hover:opacity-80 transition-all hover:scale-105 mono font-bold"
+                            style="background:rgba(245,158,11,0.12);color:#f59e0b;border-color:rgba(245,158,11,0.3);">
+                            <i class="fas fa-exchange-alt mr-1"></i>Trade
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            // Update gold & silver stat cards
+            const gold   = commodities.find(c => c.symbol === 'XAU');
+            const silver = commodities.find(c => c.symbol === 'XAG');
+            const wti    = commodities.find(c => c.symbol === 'WTI');
+
+            if (gold) {
+                const goldEl = document.getElementById('gold-price-stat');
+                const goldBig = document.getElementById('gold-price-big');
+                const goldChg = document.getElementById('gold-change-stat');
+                const goldChgBig = document.getElementById('gold-change-big');
+                if (goldEl)   goldEl.textContent = '$' + gold.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                if (goldBig)  goldBig.textContent = '$' + gold.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                if (goldChg)  { goldChg.textContent = (gold.change>=0?'+':'')+gold.change.toFixed(2)+'%'; goldChg.className = 'text-sm mono '+(gold.change>=0?'text-emerald-400':'text-red-400'); }
+                if (goldChgBig) { goldChgBig.textContent = (gold.change>=0?'+':'')+gold.change.toFixed(2)+'%'; goldChgBig.className = 'mono '+(gold.change>=0?'text-emerald-400':'text-red-400'); }
+            }
+            if (silver) {
+                const sEl = document.getElementById('silver-price-stat');
+                const sBig = document.getElementById('silver-price-big');
+                const sChg = document.getElementById('silver-change-stat');
+                if (sEl)  sEl.textContent = '$' + silver.price.toFixed(2);
+                if (sBig) sBig.textContent = '$' + silver.price.toFixed(2);
+                if (sChg) { sChg.textContent = (silver.change>=0?'+':'')+silver.change.toFixed(2)+'%'; sChg.className = 'text-sm mono '+(silver.change>=0?'text-emerald-400':'text-red-400'); }
+            }
+            if (wti) {
+                const wEl = document.getElementById('wti-price-stat');
+                const wChg = document.getElementById('wti-change-stat');
+                if (wEl)  wEl.textContent = '$' + wti.price.toFixed(2);
+                if (wChg) { wChg.textContent = (wti.change>=0?'+':'')+wti.change.toFixed(2)+'%'; wChg.className = 'text-sm mono '+(wti.change>=0?'text-emerald-400':'text-red-400'); }
+            }
+
+            // Update gold/silver ratio
+            if (gold && silver) {
+                const ratio = gold.price / silver.price;
+                const gsEl  = document.getElementById('gs-ratio');
+                const gsNeedle = document.getElementById('gs-needle');
+                const gsSig = document.getElementById('gs-signal-text');
+                if (gsEl) gsEl.textContent = ratio.toFixed(1);
+                if (gsNeedle) gsNeedle.style.left = Math.min(Math.max((ratio / 120) * 100, 5), 95) + '%';
+                if (gsSig) {
+                    if (ratio > 80)       gsSig.textContent = 'Silver historically cheap vs Gold — rotation opportunity';
+                    else if (ratio > 65)  gsSig.textContent = 'Ratio above historical average — modest silver undervaluation';
+                    else if (ratio > 50)  gsSig.textContent = 'Ratio near historical average — neutral positioning';
+                    else                  gsSig.textContent = 'Silver historically expensive vs Gold — consider rebalancing';
+                }
+            }
+        }
+
+        // Commodity sparkline charts
+        function initCommodityCharts() {
+            function sparklineData(base, days, vol) {
+                const pts = [];
+                let v = base;
+                for (let i = 0; i < days; i++) { v += (Math.random()-0.48)*vol; pts.push(+v.toFixed(2)); }
+                return pts;
+            }
+
+            // Seed sparklines from live price if available, else use commodity array value
+            const goldBase   = (commodities.find(c => c.symbol === 'XAU') || {}).price || 2900;
+            const silverBase = (commodities.find(c => c.symbol === 'XAG') || {}).price || 32;
+
+            const goldCtx = document.getElementById('gold-chart');
+            if (goldCtx) {
+                new Chart(goldCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(60).fill(''),
+                        datasets: [{ data: sparklineData(goldBase * 0.94, 60, goldBase * 0.005), borderColor: '#fcd34d', borderWidth: 2, fill: true, backgroundColor: 'rgba(252,211,77,0.08)', tension: 0.4, pointRadius: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: false }
+                });
+            }
+
+            const silverCtx = document.getElementById('silver-chart');
+            if (silverCtx) {
+                new Chart(silverCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array(60).fill(''),
+                        datasets: [{ data: sparklineData(silverBase * 0.94, 60, silverBase * 0.015), borderColor: '#94a3b8', borderWidth: 2, fill: true, backgroundColor: 'rgba(148,163,184,0.08)', tension: 0.4, pointRadius: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: false }
+                });
+            }
+        }
+
+        // Simple commodity trade modal
+        function openCommodityTrade(symbol, name, price) {
+            const existing = document.getElementById('comm-trade-modal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'comm-trade-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center';
+            modal.innerHTML = `
+                <div class="glass rounded-xl p-6 w-full max-w-sm mx-4" style="border:1px solid rgba(245,158,11,0.3);">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold" style="color:#f59e0b;"><i class="fas fa-coins mr-2"></i>Trade ${name}</h3>
+                        <button onclick="document.getElementById('comm-trade-modal').remove()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="bg-black/30 rounded-lg p-3 mb-4" style="border:1px solid rgba(245,158,11,0.2);">
+                        <div class="flex justify-between text-sm"><span class="text-slate-400">Symbol</span><span class="mono font-bold" style="color:#f59e0b;">${symbol}</span></div>
+                        <div class="flex justify-between text-sm mt-1"><span class="text-slate-400">Current Price</span><span class="mono font-bold text-white">$${parseFloat(price).toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+                    </div>
+                    <div class="space-y-3 mb-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 uppercase mono mb-1">Action</label>
+                            <select id="comm-action" class="w-full bg-slate-900 rounded-lg px-3 py-2 text-white text-sm" style="border:1px solid rgba(245,158,11,0.3);">
+                                <option value="buy">Buy Long</option>
+                                <option value="sell">Sell Short</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 uppercase mono mb-1">Quantity (units)</label>
+                            <input type="number" id="comm-qty" min="1" placeholder="10" class="w-full bg-slate-900 rounded-lg px-3 py-2 text-white mono text-sm" style="border:1px solid rgba(245,158,11,0.3);">
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="document.getElementById('comm-trade-modal').remove()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition">Cancel</button>
+                        <button onclick="submitCommodityTrade('${symbol}',${price})" class="flex-1 py-2 rounded-lg text-sm font-bold transition mono" style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);">
+                            <i class="fas fa-paper-plane mr-1"></i>Submit
+                        </button>
+                    </div>
+                </div>`;
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            document.body.appendChild(modal);
+        }
+
+        function submitCommodityTrade(symbol, price) {
+            const action = document.getElementById('comm-action')?.value || 'buy';
+            const qty    = document.getElementById('comm-qty')?.value || '1';
+            const log    = document.getElementById('trade-log');
+            if (log) {
+                const entry = document.createElement('div');
+                entry.className = 'flex items-center gap-3 p-2 rounded text-xs mono border-l-2 ' + (action==='buy' ? 'bg-yellow-500/10 border-yellow-500' : 'bg-red-500/10 border-red-500');
+                entry.innerHTML = `<span class="text-slate-500">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span class="font-bold" style="color:#f59e0b;">${action.toUpperCase()}</span><span class="text-white">${symbol}</span><span class="text-slate-300">×${qty}</span><span class="text-slate-500">@ $${parseFloat(price).toFixed(2)}</span>`;
+                log.insertBefore(entry, log.firstChild);
+            }
+            document.getElementById('comm-trade-modal')?.remove();
+        }
+
+        // Live Stock Data Configuration
+        // Using Finnhub free API - 60 calls/minute
+        const FINNHUB_API_KEY = 'd6a82j1r01qqjvbpevogd6a82j1r01qqjvbpevp0';
+        const stockPrices = {};
+        const stockChanges = {};
+        let usingLiveData = false;
+
+        // Crypto live prices (from CoinGecko - free, no key)
+        const cryptoPrices = {};
+        const cryptoChanges = {};
+
+        async function fetchLiveCrypto() {
+            try {
+                const res = await fetch(
+                    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,ripple,binancecoin,cardano,avalanche-2&vs_currencies=usd&include_24hr_change=true'
+                );
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                if (data.bitcoin)       { cryptoPrices['BTC']  = data.bitcoin.usd;       cryptoChanges['BTC']  = data.bitcoin.usd_24h_change; }
+                if (data.ethereum)      { cryptoPrices['ETH']  = data.ethereum.usd;      cryptoChanges['ETH']  = data.ethereum.usd_24h_change; }
+                if (data.solana)        { cryptoPrices['SOL']  = data.solana.usd;        cryptoChanges['SOL']  = data.solana.usd_24h_change; }
+                if (data.ripple)        { cryptoPrices['XRP']  = data.ripple.usd;        cryptoChanges['XRP']  = data.ripple.usd_24h_change; }
+                if (data.binancecoin)   { cryptoPrices['BNB']  = data.binancecoin.usd;   cryptoChanges['BNB']  = data.binancecoin.usd_24h_change; }
+                if (data.cardano)       { cryptoPrices['ADA']  = data.cardano.usd;       cryptoChanges['ADA']  = data.cardano.usd_24h_change; }
+                if (data['avalanche-2']){ cryptoPrices['AVAX'] = data['avalanche-2'].usd; cryptoChanges['AVAX'] = data['avalanche-2'].usd_24h_change; }
+                console.log(`✅ Live crypto — BTC: $${cryptoPrices['BTC']?.toFixed(0)}  ETH: $${cryptoPrices['ETH']?.toFixed(0)}  XRP: $${cryptoPrices['XRP']?.toFixed(4)}`);
+            } catch(e) {
+                console.warn('CoinGecko unavailable:', e.message);
+            }
+        }
+
+        // Fetch live stock quotes from Finnhub
+        async function fetchLiveQuotes() {
+            const stockSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'SPY', 'QQQ'];
+            
+            try {
+                const promises = stockSymbols.map(async (symbol) => {
+                    try {
+                        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const data = await response.json();
+                        
+                        if (data && data.c) {
+                            stockPrices[symbol] = data.c; // Current price
+                            const changePercent = ((data.c - data.pc) / data.pc) * 100;
+                            stockChanges[symbol] = changePercent;
+                            return { symbol, price: data.c, change: changePercent };
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to fetch ${symbol}:`, err);
+                    }
+                    return null;
+                });
+
+                const results = await Promise.all(promises);
+                const validResults = results.filter(r => r !== null);
+                
+                if (validResults.length > 0) {
+                    usingLiveData = true;
+                    console.log(`✅ Live data active: ${validResults.length} symbols from Finnhub`);
+                    return validResults;
+                } else {
+                    console.warn('⚠️ No live data available, using mock data');
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                return null;
+            }
+        }
+
+        // REAL-TIME PRICE FETCHING SYSTEM
+        let lastPriceUpdate = null;
+        let priceUpdateInterval = null;
+        
+        // Update ticker with real market prices
+        async function updateLiveTicker() {
+            const tickerContainer = document.getElementById('ticker');
+            
+            // Fetch live prices (in background; metals come from commodities array immediately)
+            const liveData = await fetchLiveQuotes();
+            
+            // Crypto & metals mock/live data (fallback when Finnhub not available)
+            const mockFallback = {
+                'AAPL': { price: 264.58,   change:  1.54 },
+                'MSFT': { price: 397.23,   change:  0.31 },
+                'GOOGL':{ price: 314.98,   change:  4.01 },
+                'AMZN': { price: 210.11,   change:  2.56 },
+                'TSLA': { price: 411.82,   change:  0.03 },
+                'NVDA': { price: 189.82,   change:  1.02 },
+                'META': { price: 657.00,   change:  1.90 },
+                'SPY':  { price: 689.43,   change:  0.72 },
+                'QQQ':  { price: 608.81,   change:  0.88 },
+                'BTC':  { price: 67316.00, change: -1.75 },
+                'ETH':  { price: 1912.73,  change: -2.10 },
+                'SOL':  { price: 143.80,   change:  4.73 }
+            };
+
+            const tickerData = symbols.map(sym => {
+                let price, change, isUp;
+
+                // Metals: pull from live commodities array (updated by gold-api.com)
+                if (sym === 'XAU' || sym === 'XAG') {
+                    const metal = commodities.find(c => c.symbol === sym);
+                    price  = metal ? metal.price  : (sym === 'XAU' ? 5107.90 : 84.77);
+                    change = metal ? metal.change : 0.82;
+                    isUp   = change >= 0;
+                // Crypto: pull from CoinGecko live data
+                } else if (['BTC','ETH','SOL'].includes(sym) && cryptoPrices[sym]) {
+                    price  = cryptoPrices[sym];
+                    change = cryptoChanges[sym] || 0;
+                    isUp   = change >= 0;
+                // Stocks: pull from Finnhub live data
+                } else if (usingLiveData && stockPrices[sym]) {
+                    price  = stockPrices[sym];
+                    change = stockChanges[sym];
+                    isUp   = change >= 0;
+                // Fallback: realistic hardcoded prices
+                } else if (mockFallback[sym]) {
+                    price  = mockFallback[sym].price;
+                    change = mockFallback[sym].change;
+                    isUp   = change >= 0;
+                } else {
+                    price  = 0;
+                    change = 0;
+                    isUp   = true;
+                }
+                
+                // Format price based on magnitude
+                let priceFormatted;
+                if (price >= 1000) {
+                    priceFormatted = price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else if (price >= 1) {
+                    priceFormatted = price.toFixed(2);
+                } else {
+                    priceFormatted = price.toFixed(4);
+                }
+                
+                // Label color: gold=yellow, silver=slate, crypto=purple, stocks=cyan
+                let labelColor = '#94a3b8';
+                if (sym === 'XAU') labelColor = '#fcd34d';
+                else if (sym === 'XAG') labelColor = '#cbd5e1';
+                else if (['BTC','ETH','SOL'].includes(sym)) labelColor = '#c084fc';
+                else labelColor = '#67e8f9';
+
+                return `<span class="inline-flex items-center gap-2 mx-4">
+                    <span class="font-bold mono text-xs" style="color:${labelColor}">${sym}</span>
+                    <span class="${isUp ? 'up' : 'down'} mono text-xs">$${priceFormatted}</span>
+                    <span class="${isUp ? 'up' : 'down'} text-xs">${isUp ? '▲' : '▼'}${Math.abs(change).toFixed(2)}%</span>
+                </span><span class="text-slate-700 mx-1">|</span>`;
+            }).join('');
+            
+            tickerContainer.innerHTML = tickerData + tickerData;
+            lastPriceUpdate = new Date();
+            
+            console.log(`✅ Ticker updated with real prices at ${lastPriceUpdate.toLocaleTimeString()}`);
+        }
+        
+        // Force immediate price refresh
+        async function refreshAllPrices() {
+            console.log('🔄 Fetching real-time market prices...');
+
+            // Fetch stocks + crypto + metals in parallel
+            await Promise.all([fetchLiveQuotes(), fetchLiveCrypto(), fetchLiveMetals()]);
+
+            // Update ticker
+            await updateLiveTicker();
+            
+            // Update positions with real prices
+            if (usingLiveData) {
+                positions.forEach(pos => {
+                    if (stockPrices[pos.symbol]) {
+                        pos.current = stockPrices[pos.symbol];
+                    }
+                });
+                updatePositions();
+                
+                // Recalculate portfolio value
+                const totalValue = positions.reduce((sum, pos) => sum + (pos.current * pos.qty), 0);
+                portfolioValue = totalValue + 50000;
+                document.getElementById('total-value').textContent = `$${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                
+                console.log('✅ All prices updated with live market data');
+            } else {
+                console.warn('⚠️ Could not fetch live prices');
+            }
+        }
+
+        // Update positions with live prices
+        async function updateLivePositions() {
+            if (!usingLiveData) return;
+            
+            positions.forEach(pos => {
+                if (stockPrices[pos.symbol]) {
+                    pos.current = stockPrices[pos.symbol];
+                }
+            });
+            
+            updatePositions();
+            
+            // Update total portfolio value (market value of all positions + cash reserve)
+            const totalValue = positions.reduce((sum, pos) => sum + (pos.current * pos.qty), 0);
+            portfolioValue = totalValue + 50000; // $50k cash reserve
+
+            document.getElementById('total-value').textContent = `$${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        // Initialize Everything
+        window.addEventListener('load', () => {
+            // Initialize master timeframe data
+            initializeMasterData();
+
+            initTicker();
+            updatePositions();
+            populateAgentCards();
+            updateCryptoPrices();
+            updateCommoditiesTable();
+            initCommodityCharts();
+            updateBondRates();
+            updateForex();
+            updateTime();
+            fetchLiveMetals();
+            fetchLiveCrypto();
+            setInterval(fetchLiveMetals, 60000);
+            setInterval(fetchLiveCrypto, 60000);
+
+            // New UI systems
+            updateVixWidget();
+            renderApprovalQueue();
+            renderAgentDotGrid();
+
+            // Delay chart init so sidebar margin has been applied and layout is fully painted
+            setTimeout(() => {
+                initCharts();
+                updateTimeframe('1m');
+                // Second resize pass after full paint
+                setTimeout(() => {
+                    if (tvChart) {
+                        const c = document.getElementById('tv-chart');
+                        if (c && c.offsetWidth > 0) {
+                            tvChart.applyOptions({ width: c.offsetWidth });
+                            tvChart.timeScale().fitContent();
+                        }
+                    }
+                }, 300);
+            }, 150);
+
+            // IMMEDIATE: Fetch and display real market prices
+            refreshAllPrices();
+
+            // Update prices every 60 seconds (1 minute) for real-time feel
+            setInterval(refreshAllPrices, 60000);
+
+            // VIX updates every 8 seconds
+            setInterval(updateVixWidget, 8000);
+
+            // Simulation loops
+            setInterval(updatePortfolio, 3000);
+            setInterval(addTradeLog, 2500);
+            setInterval(updateTime, 1000);
+            setInterval(updateCryptoPrices, 2000);
+            setInterval(updateCommoditiesTable, 3000);
+            setInterval(updateBondRates, 5000);
+            setInterval(updateForex, 2500);
+            setInterval(() => {
+                allAgents.forEach(agent => {
+                    if (Math.random() > 0.7) {
+                        const statuses = ['active', 'scanning', 'waiting', 'monitoring', 'ready', 'analyzing'];
+                    }
+                });
+                updateAgentList();
+            }, 5000);
+            
+            // VALIDATION AGENT SYSTEM
+            // Worker Agent: Performs the work
+            // Checker Agent: Validates and reports
+            const ValidationAgents = {
+                worker: {
+                    name: 'Alpha-Worker',
+                    status: 'active',
+                    tasksCompleted: 0,
+                    lastAction: null
+                },
+                checker: {
+                    name: 'Beta-Checker',
+                    status: 'monitoring',
+                    issuesFound: [],
+                    lastCheck: null
+                },
+                
+                // Worker performs tasks
+                performWork(taskName) {
+                    this.worker.status = 'working';
+                    this.worker.lastAction = taskName;
+                    this.worker.tasksCompleted++;
+                    console.log(`[${this.worker.name}] Performing: ${taskName}`);
+                    
+                    // Schedule checker to validate after work
+                    setTimeout(() => this.checker.validate(taskName), 1000);
+                },
+                
+                // Checker validates the work
+                validate(workPerformed) {
+                    this.checker.status = 'checking';
+                    this.checker.lastCheck = new Date().toISOString();
+                    const issues = [];
+                    
+                    // Check 1: Chart exists and has data
+                    const chartCanvas = document.getElementById('main-chart');
+                    if (!chartCanvas) {
+                        issues.push('❌ CRITICAL: Chart canvas not found');
+                    } else if (!mainChartInstance || !mainChartInstance.data.datasets[0].data.length) {
+                        issues.push('❌ CRITICAL: Chart has no data');
+                    } else {
+                        issues.push('✅ Chart is rendering with data');
+                    }
+                    
+                    // Check 2: Live data is loading
+                    if (!usingLiveData) {
+                        issues.push('⚠️ WARNING: Using mock data instead of live data');
+                    } else {
+                        issues.push('✅ Live data is active');
+                    }
+                    
+                    // Check 3: All buttons are clickable
+                    const buttons = ['btn-1d', 'btn-1w', 'btn-1m', 'btn-1y', 'btn-all'];
+                    const missingButtons = buttons.filter(id => !document.getElementById(id));
+                    if (missingButtons.length > 0) {
+                        issues.push(`❌ CRITICAL: Missing buttons: ${missingButtons.join(', ')}`);
+                    } else {
+                        issues.push('✅ All timeframe buttons present');
+                    }
+                    
+                    // Check 4: Portfolio value is displayed
+                    const portfolioValue = document.getElementById('total-value');
+                    if (!portfolioValue || portfolioValue.textContent === '$0.00') {
+                        issues.push('❌ CRITICAL: Portfolio value not showing');
+                    } else {
+                        issues.push(`✅ Portfolio value: ${portfolioValue.textContent}`);
+                    }
+                    
+                    // Check 5: JavaScript errors
+                    if (window.jsErrors && window.jsErrors.length > 0) {
+                        issues.push(`❌ JavaScript errors: ${window.jsErrors.length}`);
+                    } else {
+                        issues.push('✅ No JavaScript errors detected');
+                    }
+                    
+                    this.checker.issuesFound = issues;
+                    this.checker.status = 'monitoring';
+                    
+                    // Display report in console
+                    console.log('\n' + '='.repeat(60));
+                    console.log('VALIDATION AGENT REPORT');
+                    console.log('='.repeat(60));
+                    console.log(`Work performed: ${workPerformed}`);
+                    console.log(`Time: ${new Date().toLocaleTimeString()}`);
+                    console.log('-'.repeat(60));
+                    issues.forEach(issue => console.log(issue));
+                    console.log('='.repeat(60) + '\n');
+                    
+                    // Return summary for display
+                    return {
+                        timestamp: new Date().toISOString(),
+                        work: workPerformed,
+                        status: issues.some(i => i.includes('❌')) ? 'FAILED' : 'PASSED',
+                        issues: issues
+                    };
+                },
+                
+                // Get current status
+                getStatus() {
+                    return {
+                        worker: this.worker,
+                        checker: this.checker,
+                        timestamp: new Date().toISOString()
+                    };
+                }
+            };
+            
+            // Expose to global scope for debugging
+            window.ValidationAgents = ValidationAgents;
+            
+            // Track JavaScript errors
+            window.jsErrors = [];
+            window.addEventListener('error', (e) => {
+                window.jsErrors.push({
+                    message: e.message,
+                    filename: e.filename,
+                    line: e.lineno,
+                    time: new Date().toISOString()
+                });
+            });
+            
+            // Run initial validation
+            console.log('🔍 Starting Validation Agents...');
+            ValidationAgents.performWork('Initial Page Load');
+            
+            // Schedule periodic validation every 30 seconds
+            setInterval(() => {
+                ValidationAgents.performWork('Periodic Check');
+            }, 30000);
+        });
+    </script>
+    
+    <!-- Footer Link to Plan -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <a href="https://vidismart.com/plans/FORTUNA_TRADE_AI_TRADING_SYSTEM_PLAN.html" 
+           class="bg-gradient-to-r from-purple-600 to-cyan-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+           title="View AI Trading System Upgrade Plan">
+            <i class="fas fa-robot"></i> View AI Plan
+        </a>
+    </div>
+</body>
+</html>

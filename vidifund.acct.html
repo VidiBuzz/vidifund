@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidiFund | Complete Intelligence Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vidi-green: #16a34a;
+            --vidi-green-dark: #15803d;
+            --vidi-green-light: #f0fdf4;
+            --vidi-red: #dc2626;
+            --vidi-red-light: #fef2f2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Kumbh Sans', sans-serif; background-color: var(--bg); color: var(--text-main); }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 900; font-size: 2.2rem; color: var(--vidi-green); text-transform: uppercase; letter-spacing: -2px; }
+
+        nav { display: flex; gap: 5px; overflow-x: auto; padding: 5px; }
+        .nav-btn {
+            background: none; border: 1px solid transparent; padding: 8px 15px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 900; color: var(--text-muted); text-transform: uppercase;
+            cursor: pointer; transition: 0.2s; white-space: nowrap;
+        }
+        .nav-btn:hover { color: var(--vidi-green); background: var(--vidi-green-light); }
+        .nav-btn.active { background: var(--vidi-green-light); color: var(--vidi-green); border-color: var(--vidi-green); }
+
+        main { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Summary Hero */
+        .order-hero {
+            background: #0f172a; color: #fff; border-radius: 40px; padding: 3rem;
+            display: grid; grid-template-columns: 1fr 350px; gap: 3rem; margin-bottom: 3rem;
+        }
+        .hero-left h2 { font-size: 3.5rem; line-height: 0.9; margin-bottom: 1.5rem; font-style: italic; font-weight: 900; }
+        .hero-left h2 span { color: var(--vidi-green); font-style: normal; }
+        .trade-data { background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .trade-line { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #94a3b8; }
+        .trade-total { font-size: 2rem; font-weight: 900; color: #fff; border-top: 1px solid #334155; margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; }
+
+        .media-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+        .media-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.2rem; border-radius: 20px; }
+        .media-box h4 { font-size: 0.7rem; text-transform: uppercase; color: var(--vidi-green); margin-bottom: 1rem; letter-spacing: 1px; }
+        video, audio { width: 100%; border-radius: 10px; }
+
+        /* Summary Grid */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .fund-card { background: #fff; padding: 2rem; border-radius: 30px; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; position: relative; }
+        .fund-card:hover { border-color: var(--vidi-green); transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .fund-card.sell-order { border: 2.5px solid var(--vidi-red); background: var(--vidi-red-light); }
+        .fund-card h3 { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .fund-tag { font-size: 0.7rem; font-weight: 900; background: var(--bg); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 1rem; }
+        .fund-gain { float: right; font-weight: 900; font-size: 1.2rem; color: var(--vidi-green); }
+
+        /* Holdings List */
+        .holdings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .stock-card { background: #fff; padding: 1.5rem; border-radius: 25px; border: 1px solid var(--border); transition: 0.3s; }
+        .stock-card:hover { border-color: var(--vidi-green); transform: translateY(-5px); }
+        
+        .stock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .ticker-link { font-size: 1.5rem; font-weight: 900; color: #1e293b; text-decoration: none; }
+        .ticker-link:hover { color: var(--vidi-green); }
+        .perf-badge { font-weight: 900; font-size: 0.8rem; padding: 4px 10px; border-radius: 100px; }
+        .up { background: #dcfce7; color: #166534; }
+        .down { background: #fee2e2; color: #991b1b; }
+
+        .company-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1rem; height: 3.2em; overflow: hidden; }
+        
+        /* Media Dashboard */
+        .media-dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        .featured-video { background: #0f172a; border-radius: 20px; overflow: hidden; }
+        .featured-video video { width: 100%; display: block; }
+        .video-playlist { display: flex; gap: 10px; padding: 15px; background: rgba(255,255,255,0.05); overflow-x: auto; }
+        .playlist-item { min-width: 150px; cursor: pointer; opacity: 0.6; transition: 0.3s; }
+        .playlist-item.active, .playlist-item:hover { opacity: 1; }
+        .playlist-item img { width: 100%; border-radius: 10px; margin-bottom: 5px; }
+        .playlist-item span { font-size: 0.7rem; color: #fff; display: block; }
+        
+        /* Audio Panel */
+        .audio-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 1.5rem; }
+        .audio-panel h4 { font-size: 0.8rem; text-transform: uppercase; color: var(--vidi-green); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        .audio-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .audio-item:hover { background: rgba(255,255,255,0.1); }
+        .play-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--vidi-green); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .audio-title { flex: 1; font-size: 0.85rem; color: #fff; }
+        .audio-duration { font-size: 0.75rem; color: #94a3b8; }
+        
+        /* Enhanced Fund Cards */
+        .fund-card { overflow: hidden; }
+        .fund-image { position: relative; height: 150px; overflow: hidden; }
+        .fund-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .fund-card:hover .fund-image img { transform: scale(1.05); }
+        .fund-overlay { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; }
+        .fund-content { padding: 1.5rem; }
+        .fund-actions { display: flex; gap: 8px; padding: 0 1.5rem 1.5rem; }
+        .media-btn { flex: 1; padding: 8px; background: var(--vidi-green-light); border: 1px solid var(--vidi-green); border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .media-btn:hover { background: var(--vidi-green); }
+        
+        /* Enhanced Stock Cards */
+        .stock-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+        .company-logo { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: #f8fafc; padding: 5px; }
+        .stock-title { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+        
+        @media (max-width: 900px) { .order-hero { grid-template-columns: 1fr; } .media-dashboard { grid-template-columns: 1fr; } }
+        
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
+        .met-item span { display: block; font-size: 0.6rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; }
+        .met-item strong { font-size: 0.85rem; color: #1e293b; }
+
+        footer { text-align: center; padding: 4rem; border-top: 1px solid var(--border); margin-top: 4rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; }
+
+        @media (max-width: 900px) { .order-hero { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">VidiFund</div>
+            <nav id="nav-bar"></nav>
+        </div>
+    </header>
+
+    <main id="app-root"></main>
+
+    <footer>VidiFund Wealth Management © 2026 | Analysis for Account 235488681</footer>
+
+    <script>
+        // Use a robust way to access navigation to avoid ReferenceErrors
+        const getNavBar = () => document.getElementById('nav-bar');
+        const getAppRoot = () => document.getElementById('app-root');
+
+        const funds = {
+            summary: { name: "Overview", symbol: "SUMMARY" },
+            fcpi: {
+                symbol: "FCPI", name: "Fidelity Stocks for Inflation",
+                rec: "SELL 90 SHARES", gain: "+56.52%", isSell: true,
+                holdings: [
+                    { sym: 'AAPL', name: 'Apple Inc.', desc: 'Global leader in consumer electronics and ecosystem services.', cap: '$3.41T', perf25: '+19.8%', profit: 'YES', earn: '$6.57', site: 'apple.com' },
+                    { sym: 'MSFT', name: 'Microsoft Corp', desc: 'Enterprise software giant and leader in cloud computing.', cap: '$3.82T', perf25: '+24.1%', profit: 'YES', earn: '$11.80', site: 'microsoft.com' },
+                    { sym: 'NVDA', name: 'NVIDIA Corp', desc: 'Preeminent provider of high-end AI computing hardware.', cap: '$3.54T', perf25: '+138.5%', profit: 'YES', earn: '$28.10', site: 'nvidia.com' },
+                    { sym: 'XOM', name: 'Exxon Mobil', desc: 'Global energy major with integrated operations and massive scale.', cap: '$510B', perf25: '+12.4%', profit: 'YES', earn: '3.4% Div', site: 'exxonmobil.com' },
+                    { sym: 'CVX', name: 'Chevron Corp', desc: 'Major energy producer focused on high-margin upstream assets.', cap: '$305B', perf25: '+8.1%', profit: 'YES', earn: '4.1% Div', site: 'chevron.com' },
+                    { sym: 'LIN', name: 'Linde plc', desc: 'Largest industrial gas company with highly defensive contracts.', cap: '$220B', perf25: '+15.2%', profit: 'YES', earn: '$15.20', site: 'linde.com' },
+                    { sym: 'AMZN', name: 'Amazon.com', desc: 'E-commerce and cloud (AWS) infrastructure market leader.', cap: '$2.1T', perf25: '+31.4%', profit: 'YES', earn: '$4.20', site: 'amazon.com' },
+                    { sym: 'GOOGL', name: 'Alphabet Inc.', desc: 'Digital advertising monopoly transitioning into AI services.', cap: '$2.2T', perf25: '+22.5%', profit: 'YES', earn: '$6.80', site: 'google.com' },
+                    { sym: 'META', name: 'Meta Platforms', desc: 'Social media leader with world-class AI research and compute.', cap: '$1.4T', perf25: '+55.2%', profit: 'YES', earn: '$18.40', site: 'meta.com' },
+                    { sym: 'LLY', name: 'Eli Lilly', desc: 'Pharmaceutical leader in weight loss and chronic disease treatments.', cap: '$840B', perf25: '+68.1%', profit: 'YES', earn: '$12.40', site: 'lilly.com' },
+                    { sym: 'AVGO', name: 'Broadcom', desc: 'Critical enterprise software and AI semiconductor designer.', cap: '$842B', perf25: '+45.3%', profit: 'YES', earn: '$14.20', site: 'broadcom.com' },
+                    { sym: 'TSLA', name: 'Tesla Inc.', desc: 'Pioneer in EVs and robotics transitioning to autonomous platforms.', cap: '$720B', perf25: '-5.4%', profit: 'YES', earn: '$3.10', site: 'tesla.com' },
+                    { sym: 'JPM', name: 'JPMorgan Chase', desc: 'Global financial services fortress with unparalleled scale.', cap: '$582B', perf25: '+14.2%', profit: 'YES', earn: '2.5% Div', site: 'jpmorgan.com' },
+                    { sym: 'UNH', name: 'UnitedHealth', desc: 'Managed healthcare and technology-enabled services leader.', cap: '$480B', perf25: '+6.5%', profit: 'YES', earn: '$22.10', site: 'unitedhealthgroup.com' },
+                    { sym: 'V', name: 'Visa Inc.', desc: 'The backbone of global digital payment infrastructure.', cap: '$565B', perf25: '+16.1%', profit: 'YES', earn: '$9.80', site: 'visa.com' },
+                    { sym: 'HD', name: 'Home Depot', desc: 'Dominant US retailer for home improvement and building materials.', cap: '$340B', perf25: '+10.2%', profit: 'YES', earn: '2.4% Div', site: 'homedepot.com' }
+                ]
+            },
+            fdrr: {
+                symbol: "FDRR", name: "Fidelity Dividend Rising Rates",
+                rec: "HOLD / SECONDARY TRIM", gain: "+12.15%", isSell: false,
+                holdings: [
+                    { sym: 'MSFT', name: 'Microsoft Corp', desc: 'Software giant and enterprise AI infrastructure leader.', cap: '$3.82T', perf25: '+24.1%', profit: 'YES', earn: '$11.80', site: 'microsoft.com' },
+                    { sym: 'AAPL', name: 'Apple Inc.', desc: 'Global consumer electronics and hardware leader.', cap: '$3.41T', perf25: '+19.8%', profit: 'YES', earn: '$6.57', site: 'apple.com' },
+                    { sym: 'JPM', name: 'JPMorgan Chase', desc: 'Top-tier banking and investment management services.', cap: '$582B', perf25: '+14.2%', profit: 'YES', earn: '2.5% Div', site: 'jpmorgan.com' },
+                    { sym: 'V', name: 'Visa Inc.', desc: 'Global digital payment network and technology services.', cap: '$565B', perf25: '+16.1%', profit: 'YES', earn: '$9.80', site: 'visa.com' },
+                    { sym: 'MA', name: 'Mastercard Inc.', desc: 'Technological leader in global digital payment systems.', cap: '$440B', perf25: '+14.5%', profit: 'YES', earn: '$12.20', site: 'mastercard.com' },
+                    { sym: 'PG', name: 'Procter & Gamble', desc: 'Diversified consumer staples and household brands.', cap: '$380B', perf25: '+6.2%', profit: 'YES', earn: '2.4% Div', site: 'pg.com' },
+                    { sym: 'COST', name: 'Costco Wholesale', desc: 'High-efficiency membership warehouse retail operator.', cap: '$310B', perf25: '+22.4%', profit: 'YES', earn: '$15.40', site: 'costco.com' },
+                    { sym: 'ORCL', name: 'Oracle Corp', desc: 'Enterprise database software and cloud infrastructure.', cap: '$420B', perf25: '+33.5%', profit: 'YES', earn: '$5.40', site: 'oracle.com' },
+                    { sym: 'TXN', name: 'Texas Instruments', desc: 'Global analog and embedded semiconductor giant.', cap: '$165B', perf25: '+7.8%', profit: 'YES', earn: '2.8% Div', site: 'ti.com' },
+                    { sym: 'IBM', name: 'IBM Corp', desc: 'Pioneer in hybrid cloud and consulting services.', cap: '$175B', perf25: '+18.4%', profit: 'YES', earn: '3.5% Div', site: 'ibm.com' },
+                    { sym: 'INTC', name: 'Intel Corp', desc: 'Semiconductor manufacturer focusing on US foundries.', cap: '$140B', perf25: '-12.2%', profit: 'NO', earn: 'N/A', site: 'intel.com' },
+                    { sym: 'WMT', name: 'Walmart Inc.', desc: 'Largest retailer by physical footprint and revenue.', cap: '$480B', perf25: '+14.2%', profit: 'YES', earn: '1.4% Div', site: 'walmart.com' },
+                    { sym: 'BAC', name: 'Bank of America', desc: 'Diversified financial services and retail banking major.', cap: '$290B', perf25: '+8.4%', profit: 'YES', earn: '2.4% Div', site: 'bankofamerica.com' },
+                    { sym: 'PFE', name: 'Pfizer Inc.', desc: 'Research-based global biopharmaceutical leader.', cap: '$160B', perf25: '-8.5%', profit: 'YES', earn: '5.8% Div', site: 'pfizer.com' },
+                    { sym: 'CVX', name: 'Chevron Corp', desc: 'Integrated energy company with strong balance sheet.', cap: '$305B', perf25: '+8.1%', profit: 'YES', earn: '4.1% Div', site: 'chevron.com' },
+                    { sym: 'UNP', name: 'Union Pacific', desc: 'Dominant freight railway logistics across Western US.', cap: '$145B', perf25: '+4.2%', profit: 'YES', earn: '2.3% Div', site: 'up.com' }
+                ]
+            },
+            fdvv: {
+                symbol: "FDVV", name: "Fidelity High Dividend",
+                rec: "HOLD / INCOME", gain: "+14.80%", isSell: false,
+                holdings: [
+                    { sym: 'XOM', name: 'Exxon Mobil', desc: 'Major energy firm with significant free cash flow.', cap: '$510B', perf25: '+12.4%', profit: 'YES', earn: '3.4% Div', site: 'exxonmobil.com' },
+                    { sym: 'ABBV', name: 'AbbVie Inc.', desc: 'Specialty biopharma with strong dividend growth.', cap: '$321B', perf25: '+14.1%', profit: 'YES', earn: '3.8% Div', site: 'abbvie.com' },
+                    { sym: 'JPM', name: 'JPMorgan Chase', desc: 'Banking and asset management world leader.', cap: '$582B', perf25: '+14.2%', profit: 'YES', earn: '2.5% Div', site: 'jpmorgan.com' },
+                    { sym: 'VZ', name: 'Verizon', desc: 'Telecom anchor with sector-leading dividend yield.', cap: '$178B', perf25: '+4.2%', profit: 'YES', earn: '6.6% Div', site: 'verizon.com' },
+                    { sym: 'T', name: 'AT&T Inc.', desc: 'Core telecommunications infrastructure provider.', cap: '$120B', perf25: '+6.1%', profit: 'YES', earn: '6.2% Div', site: 'att.com' },
+                    { sym: 'KO', name: 'Coca-Cola Co.', desc: 'Premier global consumer beverage and staples brand.', cap: '$280B', perf25: '+3.4%', profit: 'YES', earn: '2.8% Div', site: 'coca-cola.com' },
+                    { sym: 'PEP', name: 'PepsiCo Inc.', desc: 'Global beverage and diversified food giant.', cap: '$230B', perf25: '+2.1%', profit: 'YES', earn: '2.9% Div', site: 'pepsico.com' },
+                    { sym: 'BMY', name: 'Bristol Myers', desc: 'Oncology and hematology focused biopharma.', cap: '$105B', perf25: '-5.4%', profit: 'YES', earn: '4.8% Div', site: 'bmy.com' },
+                    { sym: 'CVX', name: 'Chevron Corp', desc: 'Global oil major with high shareholder returns.', cap: '$305B', perf25: '+8.1%', profit: 'YES', earn: '4.1% Div', site: 'chevron.com' },
+                    { sym: 'MO', name: 'Altria Group', desc: 'Consistently high-yielding tobacco and sin-stock.', cap: '$80B', perf25: '+1.5%', profit: 'YES', earn: '8.4% Div', site: 'altria.com' },
+                    { sym: 'UPS', name: 'UPS Inc.', desc: 'Global shipping and package delivery leader.', cap: '$130B', perf25: '+2.4%', profit: 'YES', earn: '4.2% Div', site: 'ups.com' },
+                    { sym: 'GILD', name: 'Gilead Sciences', desc: 'Healthcare leader in virology and cell therapy.', cap: '$90B', perf25: '+3.1%', profit: 'YES', earn: '4.1% Div', site: 'gilead.com' },
+                    { sym: 'RTX', name: 'RTX Corp', desc: 'Defense and aerospace technology services.', cap: '$140B', perf25: '+18.4%', profit: 'YES', earn: '2.2% Div', site: 'rtx.com' },
+                    { sym: 'MMM', name: '3M Company', desc: 'Diversified global industrial and safety products.', cap: '$60B', perf25: '-4.2%', profit: 'YES', earn: '2.4% Div', site: '3m.com' },
+                    { sym: 'LMT', name: 'Lockheed Martin', desc: 'Premier US defense and space technology systems.', cap: '$110B', perf25: '+12.1%', profit: 'YES', earn: '2.8% Div', site: 'lmt.com' },
+                    { sym: 'TGT', name: 'Target Corp', desc: 'High-scale US general merchandise retailer.', cap: '$75B', perf25: '+5.4%', profit: 'YES', earn: '2.9% Div', site: 'target.com' }
+                ]
+            },
+            ftec: {
+                symbol: "FTEC", name: "Fidelity MSCI IT Index",
+                rec: "HOLD / GROWTH", gain: "+34.99%", isSell: false,
+                holdings: [
+                    { sym: 'AAPL', name: 'Apple Inc.', desc: 'Global standard for consumer tech hardware.', cap: '$3.41T', perf25: '+19.8%', profit: 'YES', earn: '$6.57', site: 'apple.com' },
+                    { sym: 'MSFT', name: 'Microsoft Corp', desc: 'The backbone of enterprise software and AI Cloud.', cap: '$3.82T', perf25: '+24.1%', profit: 'YES', earn: '$11.80', site: 'microsoft.com' },
+                    { sym: 'NVDA', name: 'NVIDIA Corp', desc: 'Monopolistic leader in AI GPU compute hardware.', cap: '$3.54T', perf25: '+138.5%', profit: 'YES', earn: '$28.10', site: 'nvidia.com' },
+                    { sym: 'AVGO', name: 'Broadcom', desc: 'Leader in AI semiconductor and network design.', cap: '$842B', perf25: '+45.3%', profit: 'YES', earn: '$14.20', site: 'broadcom.com' },
+                    { sym: 'ADBE', name: 'Adobe Inc.', desc: 'Creative software and generative AI tools leader.', cap: '$240B', perf25: '+12.4%', profit: 'YES', earn: '$18.40', site: 'adobe.com' },
+                    { sym: 'CRM', name: 'Salesforce', desc: 'Leading platform for CRM and enterprise AI agents.', cap: '$285B', perf25: '+18.2%', profit: 'YES', earn: '$9.40', site: 'salesforce.com' },
+                    { sym: 'AMD', name: 'AMD', desc: 'High-performance computing and GPU designer.', cap: '$280B', perf25: '+22.1%', profit: 'YES', earn: '$2.80', site: 'amd.com' },
+                    { sym: 'ORCL', name: 'Oracle Corp', desc: 'Major database and cloud infrastructure provider.', cap: '$420B', perf25: '+33.5%', profit: 'YES', earn: '$5.40', site: 'oracle.com' },
+                    { sym: 'CSCO', name: 'Cisco Systems', desc: 'Global networking and cybersecurity infrastructure.', cap: '$210B', perf25: '+5.4%', profit: 'YES', earn: '3.1% Div', site: 'cisco.com' },
+                    { sym: 'INTU', name: 'Intuit Inc.', desc: 'Business and consumer financial management software.', cap: '$180B', perf25: '+14.2%', profit: 'YES', earn: '$11.20', site: 'intuit.com' },
+                    { sym: 'NOW', name: 'ServiceNow', desc: 'Enterprise IT and digital workflow automation.', cap: '$160B', perf25: '+42.1%', profit: 'YES', earn: '$10.80', site: 'servicenow.com' },
+                    { sym: 'QCOM', name: 'Qualcomm', desc: 'Pioneer in wireless chips and mobile compute.', cap: '$190B', perf25: '+15.2%', profit: 'YES', earn: '$8.40', site: 'qualcomm.com' },
+                    { sym: 'TXN', name: 'Texas Instruments', desc: 'Global leader in analog semiconductor design.', cap: '$165B', perf25: '+7.8%', profit: 'YES', earn: '2.8% Div', site: 'ti.com' },
+                    { sym: 'AMAT', name: 'Applied Materials', desc: 'Semiconductor manufacturing equipment giant.', cap: '$140B', perf25: '+26.2%', profit: 'YES', earn: '$8.10', site: 'appliedmaterials.com' },
+                    { sym: 'LRCX', name: 'Lam Research', desc: 'Etch and deposition equipment for chip makers.', cap: '$115B', perf25: '+21.4%', profit: 'YES', earn: '$31.20', site: 'lamresearch.com' },
+                    { sym: 'MU', name: 'Micron Tech', desc: 'Critical HBM memory provider for AI compute.', cap: '$110B', perf25: '+38.5%', profit: 'YES', earn: '$4.20', site: 'micron.com' }
+                ]
+            },
+            spy: {
+                symbol: "SPY", name: "S&P 500 Index Fund",
+                rec: "HOLD (BENCHMARK)", gain: "+26.41%", isSell: false,
+                holdings: [
+                    { sym: 'MSFT', name: 'Microsoft Corp', desc: 'Top constituent in the S&P 500.', cap: '$3.82T', perf25: '+24.1%', profit: 'YES', earn: '$11.80', site: 'microsoft.com' },
+                    { sym: 'AAPL', name: 'Apple Inc.', desc: 'Second largest weight in major indexes.', cap: '$3.41T', perf25: '+19.8%', profit: 'YES', earn: '$6.57', site: 'apple.com' },
+                    { sym: 'NVDA', name: 'NVIDIA Corp', desc: 'Primary growth contributor to 2025-26 returns.', cap: '$3.54T', perf25: '+138.5%', profit: 'YES', earn: '$28.10', site: 'nvidia.com' },
+                    { sym: 'AMZN', name: 'Amazon.com', desc: 'Cloud and consumer services giant.', cap: '$2.1T', perf25: '+31.4%', profit: 'YES', earn: '$4.20', site: 'amazon.com' },
+                    { sym: 'GOOGL', name: 'Alphabet Inc.', desc: 'Media, Search, and Cloud services.', cap: '$2.2T', perf25: '+22.5%', profit: 'YES', earn: '$6.80', site: 'google.com' },
+                    { sym: 'META', name: 'Meta Platforms', desc: 'Social advertising and AI hardware.', cap: '$1.4T', perf25: '+55.2%', profit: 'YES', earn: '$18.40', site: 'meta.com' },
+                    { sym: 'BRK.B', name: 'Berkshire Hathaway', desc: 'Industrial and insurance massive conglomerate.', cap: '$980B', perf25: '+14.2%', profit: 'YES', earn: 'N/A', site: 'berkshirehathaway.com' },
+                    { sym: 'LLY', name: 'Eli Lilly', desc: 'Monopolistic medical research leader.', cap: '$840B', perf25: '+68.1%', profit: 'YES', earn: '$12.40', site: 'lilly.com' },
+                    { sym: 'AVGO', name: 'Broadcom', desc: 'Backend cloud and enterprise hardware.', cap: '$842B', perf25: '+45.3%', profit: 'YES', earn: '$14.20', site: 'broadcom.com' },
+                    { sym: 'JPM', name: 'JPMorgan Chase', desc: 'US financial system leader.', cap: '$582B', perf25: '+14.2%', profit: 'YES', earn: '2.5% Div', site: 'jpmorgan.com' },
+                    { sym: 'TSLA', name: 'Tesla Inc.', desc: 'Global EV and AI robotics pioneer.', cap: '$720B', perf25: '-5.4%', profit: 'YES', earn: '$3.10', site: 'tesla.com' },
+                    { sym: 'UNH', name: 'UnitedHealth', desc: 'Healthcare delivery and coverage giant.', cap: '$480B', perf25: '+6.5%', profit: 'YES', earn: '$22.10', site: 'unitedhealthgroup.com' },
+                    { sym: 'V', name: 'Visa Inc.', desc: 'Global digital payment backbone.', cap: '$565B', perf25: '+16.1%', profit: 'YES', earn: '$9.80', site: 'visa.com' },
+                    { sym: 'XOM', name: 'Exxon Mobil', desc: 'Dominant global energy producer.', cap: '$510B', perf25: '+12.4%', profit: 'YES', earn: '3.4% Div', site: 'exxonmobil.com' },
+                    { sym: 'HD', name: 'Home Depot', desc: 'US home improvement retail leader.', cap: '$340B', perf25: '+10.2%', profit: 'YES', earn: '2.4% Div', site: 'homedepot.com' },
+                    { sym: 'COST', name: 'Costco Wholesale', desc: 'Premier subscription-based retail giant.', cap: '$310B', perf25: '+22.4%', profit: 'YES', earn: '$15.40', site: 'costco.com' }
+                ]
+            }
+        };
+
+        function switchPage(id) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+            if (id === 'summary') renderSummary();
+            else renderFund(id);
+            window.scrollTo(0,0);
+        }
+
+        function renderSummary() {
+            let fundCards = Object.values(funds).filter(f => f.symbol !== 'SUMMARY').map(f => `
+                <div class="fund-card ${f.isSell ? 'sell-order' : ''}" onclick="switchPage('${f.symbol.toLowerCase()}')">
+                    <span class="fund-gain">${f.gain}</span>
+                    <h3>${f.symbol}</h3>
+                    <div class="fund-tag">${f.name}</div>
+                    <div style="font-size:0.75rem; font-weight:900; color:${f.isSell ? '#dc2626' : '#16a34a'}; text-transform:uppercase;">${f.rec}</div>
+                </div>
+            `).join('');
+
+            getAppRoot().innerHTML = `
+                <div class="page active">
+                    <section class="order-hero">
+                        <div class="hero-left">
+                            <h2 class="italic">SELL 90 <br><span>SHARES FCPI</span></h2>
+                            <div class="trade-data">
+                                <div class="trade-line"><span>Execution Date:</span> <span>March 27, 2026</span></div>
+                                <div class="trade-line"><span>Price / Share:</span> <span>$48.24</span></div>
+                                <div class="trade-line"><span>Quantity:</span> <span>90.00 Units</span></div>
+                                <div class="trade-total"><span>Total Cash:</span> <span>$4,341.60</span></div>
+                            </div>
+                        </div>
+                        <div class="media-stack">
+                            <div class="media-box"><h4>Strategy Audio</h4><audio controls><source src="audio_summary.mp3"></audio></div>
+                            <div class="media-box"><h4>Market Analysis Video</h4><video controls><source src="strategy_video.mp4"></video></div>
+                        </div>
+                    </section>
+                    <div class="summary-grid">${fundCards}</div>
+                </div>
+            `;
+        }
+
+        function renderFund(id) {
+            const f = funds[id];
+            const holdings = f.holdings.map(s => {
+                const logoPath = `vidifund-media/images/stocks/${s.sym.toLowerCase()}.png`;
+                return `
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <img class="company-logo" src="${logoPath}" alt="${s.name} logo" onerror="this.style.display='none'">
+                        <div class="stock-title">
+                            <a href="https://finance.yahoo.com/quote/${s.sym}" target="_blank" class="ticker-link">${s.sym}</a>
+                            <span class="perf-badge ${s.perf25.startsWith('+') ? 'up' : 'down'}">${s.perf25} (2025)</span>
+                        </div>
+                    </div>
+                    <div style="font-size:0.6rem; font-weight:900; color:var(--vidi-green); text-transform:uppercase; margin-bottom:0.5rem;">${s.name}</div>
+                    <p class="company-desc">${s.desc}</p>
+                    <div class="metric-grid">
+                        <div class="met-item"><span>Market Cap</span><strong>${s.cap}</strong></div>
+                        <div class="met-item"><span>Profit Status</span><strong>${s.profit}</strong></div>
+                        <div class="met-item"><span>Earnings/EPS</span><strong>${s.earn}</strong></div>
+                        <div class="met-item"><span>2026 Trend</span><strong style="color:var(--vidi-green)">POSITIVE</strong></div>
+                    </div>
+                </div>
+            `}).join('');
+
+            getAppRoot().innerHTML = `
+                <div class="page active">
+                    <div style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:flex-end;">
+                        <div>
+                            <h2 style="font-size:3.5rem; font-weight:900; letter-spacing:-2px;">${f.name}</h2>
+                            <div style="font-weight:900; color:var(--vidi-green); text-transform:uppercase; font-size:0.8rem; margin-top:5px;">Strategy: ${f.rec}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:0.7rem; font-weight:900; color:var(--text-muted); text-transform:uppercase;">Perf '25-'26</div>
+                            <div style="font-size:2rem; font-weight:900; color:var(--vidi-green);">${f.gain}</div>
+                        </div>
+                    </div>
+                    <div class="holdings-grid">${holdings}</div>
+                </div>
+            `;
+        }
+
+        // Initialize Navigation
+        const initNav = () => {
+            const nav = getNavBar();
+            if (!nav) return;
+            nav.innerHTML = '';
+            Object.keys(funds).forEach(k => {
+                const b = document.createElement('button');
+                b.className = 'nav-btn';
+                b.textContent = funds[k].symbol;
+                b.dataset.id = k;
+                b.onclick = () => switchPage(k);
+                nav.appendChild(b);
+            });
+        };
+
+        // Start the application
+        window.addEventListener('DOMContentLoaded', () => {
+            initNav();
+            switchPage('summary');
+        });
+    </script>
+</body>
+</html>
