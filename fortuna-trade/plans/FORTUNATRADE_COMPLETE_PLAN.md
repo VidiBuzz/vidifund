@@ -10,11 +10,15 @@ This document outlines the architecture, technology stack, and implementation pl
 
 | Asset Class | Functionality | Primary Package |
 |-------------|---------------|-----------------|
-| **Stocks** | Market/limit orders, real-time quotes, portfolio management | QuantConnect Lean |
+| **Stocks** | Market/limit orders, real-time quotes, portfolio management | QuantConnect Lean / NautilusTrader |
 | **Bonds** | Treasury/Corporate bonds, yield calculations | QuantConnect Lean |
-| **Options** | Greeks (Delta, Gamma, Theta, Vega, Rho), strategies | QuantConnect Lean |
-| **Forex/4X** | Currency pairs, leverage trading, margin management | OANDA + TradingView |
-| **Crypto** | Spot trading, yield farming, staking | Freqtrade + Hummingbot |
+| **Options** | Greeks (Delta, Gamma, Theta, Vega, Rho), strategies | QuantConnect Lean / MidasTrader |
+| **Forex/4X** | Currency pairs, leverage trading, margin management | OANDA + TradingView / NautilusTrader |
+| **Crypto** | Spot trading, yield farming, staking | Freqtrade + Hummingbot / CCXT |
+| **HFT / Order Book** | Level 2/3 simulation, queue latency, spread arbitrage | hftbacktest + NautilusTrader |
+| **AI Strategy Co-Pilot** | LLM strategy synthesis, drag-and-drop visual charts | QuantDinger + FinGPT |
+| **Machine Learning / RL** | Multi-agent deep reinforcement learning, alpha modeling | Microsoft Qlib + FinRL + Qantify |
+| **Market Data & Macro** | Unified terminal research, SEC filings, global feeds | OpenBB Platform |
 | **Polymarket** | Prop bet prediction markets, conditional orders | Custom Rust Module |
 | **Yield Farming** | DeFi protocols, auto-compounding, LP provision | Yearn/Beeefy Adapters |
 
@@ -27,22 +31,59 @@ This document outlines the architecture, technology stack, and implementation pl
 | # | Project | Stars | Language | Best For | GitHub |
 |---|---------|-------|----------|----------|--------|
 | 1 | **QuantConnect/Lean** | 10k+ | C#/Python | Institutional-grade, multi-asset backtesting | `QuantConnect/Lean` |
-| 2 | **Backtrader** | 8k+ | Python | Python-first strategy development | `mementum/backtrader` |
-| 3 | **Zipline** | 18k+ | Python | Quantopian-style research | `quantopian/zipline` |
-| 4 | **Jesse** | 4k+ | Python | Crypto-native, simple syntax | `jesse-ai/jesse` |
-| 5 | **VN.PY** | 6k+ | Python | Chinese markets, futures | `vnpy/vnpy` |
+| 2 | **NautilusTrader** | 20k+ | Rust/Python | High-performance event-driven, multi-asset live/backtest | `NautechSystems/nautilus_trader` |
+| 3 | **Backtrader** | 8k+ | Python | Python-first strategy development | `mementum/backtrader` |
+| 4 | **Zipline** | 18k+ | Python | Quantopian-style research | `quantopian/zipline` |
+| 5 | **Zipline-Reloaded** | 2k+ | Python | Modern active fork, factor models, pipeline API | `stefan-jansen/zipline-reloaded` |
+| 6 | **Jesse** | 4k+ | Python | Crypto-native, simple syntax | `jesse-ai/jesse` |
+| 7 | **VN.PY** | 6k+ | Python | Chinese markets, futures | `vnpy/vnpy` |
 
 ### Category B: Crypto & DeFi Trading
 
 | # | Project | Stars | Language | Best For | GitHub |
 |---|---------|-------|----------|----------|--------|
-| 1 | **Freqtrade** | 25k+ | Python | Crypto automation, Telegram bot | `freqtrade/freqtrade` |
-| 2 | **Hummingbot** | 8k+ | Python | Market making, liquidity mining | `hummingbot/hummingbot` |
+| 1 | **Freqtrade** | 25k+ | Python | Crypto automation, Telegram bot, hyperopt | `freqtrade/freqtrade` |
+| 2 | **Hummingbot** | 8k+ | Python | Market making, liquidity mining, cross-DEX | `hummingbot/hummingbot` |
 | 3 | **Hikyuu** | 2k+ | C++/Python | High-performance quant | `fasiondog/hikyuu` |
 | 4 | **Yearn Finance** | — | Solidity | Yield farming vaults | `yearn/yearn-vaults-v3` |
 | 5 | **Beefy Finance** | — | Solidity | Cross-chain yield optimization | `beefyfinance/beefy-contracts` |
 
-### Category C: Trading APIs & Brokerages (With Account Setup)
+### Category C: High-Frequency & Microstructure Engines
+
+| # | Project | Stars | Language | Best For | GitHub |
+|---|---------|-------|----------|----------|--------|
+| 1 | **hftbacktest** | 3.7k | Rust/Python | L2/L3 order book simulation, queue position, latency sim | `nkaz001/hftbacktest` |
+| 2 | **NautilusTrader** | 20k+ | Rust/Python | Sub-millisecond event loop, direct market access (DMA) | `NautechSystems/nautilus_trader` |
+| 3 | **MidasTrader** | — | C++/Python | IBKR broker integration, binary tick data, options | `midassystems/midastrader` |
+
+### Category D: AI, Machine Learning & Strategy Synthesis
+
+| # | Project | Stars | Language | Best For | GitHub |
+|---|---------|-------|----------|----------|--------|
+| 1 | **Microsoft Qlib** | 16k+ | Python | AI-oriented quant investment platform, ML/DL alphas | `microsoft/qlib` |
+| 2 | **FinRL** | 12k+ | Python | Deep Reinforcement Learning for financial trading | `AI4Finance-Foundation/FinRL` |
+| 3 | **FinGPT** | 15k+ | Python | Open financial LLMs, sentiment analysis, SEC filings | `AI4Finance-Foundation/FinGPT` |
+| 4 | **QuantDinger** | 760+ | Python | AI strategy co-pilot, visual charts, multi-exchange | `brokermr810/QuantDinger` |
+| 5 | **Qantify** | — | Python/CUDA | GPU-accelerated quant analytics, 160+ indicators, AutoML | `Alradyin/qantify` |
+
+### Category E: Vectorized Backtesting & Portfolio Math
+
+| # | Project | Stars | Language | Best For | GitHub |
+|---|---------|-------|----------|----------|--------|
+| 1 | **VectorBT** | 5k+ | Python/Numba | Lightning-fast vectorized backtesting and sweeps | `polakowo/vectorbt` |
+| 2 | **Riskfolio-Lib** | 3.5k | Python | Quantitative asset allocation (Kelly, CVaR, Risk Parity) | `dcajasn/Riskfolio-Lib` |
+| 3 | **TA-Lib / Pandas-TA** | 10k+ | C/Python | 150+ Technical indicators and signal calculators | `mrjbq7/ta-lib` / `twopirllc/pandas-ta` |
+
+### Category F: Unified Financial Data & Exchange Connectors
+
+| # | Project | Stars | Language | Best For | GitHub |
+|---|---------|-------|----------|----------|--------|
+| 1 | **OpenBB Platform** | 36k+ | Python | Unified financial terminal: stocks, crypto, macro, SEC | `OpenBB-finance/OpenBB` |
+| 2 | **CCXT** | 35k+ | JS/Py/PHP/C# | Unified cryptocurrency trading library (100+ exchanges) | `ccxt/ccxt` |
+| 3 | **ib_insync** | 3k+ | Python | Async framework for Interactive Brokers TWS/Gateway | `erdewit/ib_insync` |
+| 4 | **Alpaca-py** | 1k+ | Python | Official modern SDK for Alpaca equities, options, crypto | `alpacahq/alpaca-py` |
+
+### Category G: Trading APIs & Brokerages (With Account Setup)
 
 | Service | Type | Fees | Features | Best For |
 |---------|------|------|----------|----------|
@@ -344,6 +385,39 @@ This aligns with your existing FortunaTrade document and provides:
 - Rust provides CLOB-grade performance
 - Aligns with your original architecture plan
 
+### For High-Frequency Execution & Direct Market Access → **NautilusTrader + hftbacktest**
+
+**Rationale:**
+- NautilusTrader provides a blazing-fast Rust core with sub-millisecond execution loops across IBKR, Binance, and Bybit.
+- hftbacktest provides accurate Level-2 and Level-3 order book reconstruction with queue position simulation for market making.
+- Bridges the gap between research backtesting and live execution without rewriting logic.
+
+### For AI Strategy Generation & Visual Analysis → **QuantDinger + FinGPT**
+
+**Rationale:**
+- QuantDinger offers an interactive LLM co-pilot that converts conversational ideas into executable Python strategies.
+- Built-in drag-and-drop visual charts (Mini-TradingView) for fast multi-indicator verification.
+- FinGPT delivers specialized financial LLMs for real-time news sentiment and SEC document parsing.
+
+### For Machine Learning Alphas & Multi-Agent RL → **Microsoft Qlib + FinRL**
+
+**Rationale:**
+- Microsoft Qlib provides institutional-grade AI factor modeling and deep learning alpha discovery.
+- FinRL provides multi-agent deep reinforcement learning environments tuned specifically for financial markets.
+- Perfect fit for the 20-agent research and execution swarms.
+
+### For Research Terminal & Unified Financial Data → **OpenBB Platform + CCXT**
+
+**Rationale:**
+- OpenBB Platform aggregates equities, fixed income, macroeconomics, crypto, and SEC filings under one unified Python API.
+- CCXT unifies REST and WebSocket communication across 100+ crypto exchanges.
+
+### For Mathematical Portfolio Allocation & Sizing → **Riskfolio-Lib**
+
+**Rationale:**
+- Solves optimal asset allocation using the Kelly Criterion, CVaR, Black-Litterman, and Risk Parity.
+- Directly feeds the Risk Manager and Size Calculator agents.
+
 ### For Agent Management → **LangGraph + Claude 4**
 
 **Rationale:**
@@ -387,24 +461,46 @@ This aligns with your existing FortunaTrade document and provides:
 ## Appendix: Key Repository URLs
 
 ```
-# Multi-Asset Trading
+# Multi-Asset & High-Frequency Trading
 https://github.com/QuantConnect/Lean
+https://github.com/NautechSystems/nautilus_trader
+https://github.com/nkaz001/hftbacktest
+https://github.com/midassystems/midastrader
 https://github.com/mementum/backtrader
 https://github.com/quantopian/zipline
+https://github.com/stefan-jansen/zipline-reloaded
 
-# Crypto Trading
+# AI, Machine Learning & Quantitative Strategy Platforms
+https://github.com/microsoft/qlib
+https://github.com/AI4Finance-Foundation/FinRL
+https://github.com/AI4Finance-Foundation/FinGPT
+https://github.com/brokermr810/QuantDinger
+https://github.com/Alradyin/qantify
+
+# Vectorized Backtesting & Mathematical Optimization
+https://github.com/polakowo/vectorbt
+https://github.com/dcajasn/Riskfolio-Lib
+https://github.com/mrjbq7/ta-lib
+https://github.com/twopirllc/pandas-ta
+
+# Crypto & DeFi Trading
 https://github.com/freqtrade/freqtrade
 https://github.com/hummingbot/hummingbot
+https://github.com/ccxt/ccxt
 
 # Yield Farming
 https://github.com/yearn/yearn-vaults-v3
 https://github.com/beefyfinance/beefy-contracts
 
-# Agentic AI
+# Agentic AI & Swarm Management
 https://github.com/langchain-ai/langgraph
 https://github.com/crewAIInc/crewAI
+https://github.com/microsoft/autogen
 
-# Data & APIs
+# Unified Market Data & Broker APIs
+https://github.com/OpenBB-finance/OpenBB
+https://github.com/erdewit/ib_insync
+https://github.com/alpacahq/alpaca-py
 https://alpaca.markets/docs
 https://binance-docs.github.io/apidocs
 https://docs.polymarket.com
@@ -637,40 +733,42 @@ Based on your Smart Stack tools at cloud.0human.net, here are the recommended ag
 
 ### 10.3 Agent Definitions
 
+The 20-Agent Swarm operates as a collaborative matrix organized into Research, Execution, and Risk swarms, with dual-indexing (Functional Role + Tactical Swarm Callsign from `fortuna-trade.html`):
+
 #### RESEARCH SWARM (8 Agents)
 
-| Agent | Role | Tools | Data Sources |
-|-------|------|-------|---------------|
-| **1. VIX Analyst** | Monitor VIX levels, determine market regime | yfinance, Alpha Vantage | ^VIX, ^VXN, global VIX indexes |
-| **2. Market Scanner** | Scan for opportunities across all markets | QuantConnect Lean, Alpaca API | US, UK, JP, CN, DE, IN markets |
-| **3. Fundamental Analyst** | Earnings, financial statements, news | FMP, TradingEconomics, NewsAPI | SEC filings, earnings |
-| **4. Technical Analyst** | Chart patterns, indicators, signals | Backtrader, TradingView | Price data, TA indicators |
-| **5. Sentiment Agent** | News sentiment, social media | NewsAPI, Finviz, Apify | Twitter, Reddit, news |
-| **6. Forex Analyst** | Currency pairs, carry trades | OANDA, FXCM | EUR/USD, GBP/USD, USD/JPY, etc. |
-| **7. Crypto Analyst** | On-chain data, DeFi yields | CoinGecko, Yearn SDK | TVL, APY, TVL, protocol data |
-| **8. Polymarket Analyst** | Prediction markets, prop bets | Polymarket API | Event probabilities |
+| Callsign | Functional Role | Specialized Tools | Primary Data Sources |
+|:---|:---|:---|:---|
+| **01 Alpha-Hunter** | Alpha Generation & Factor Mining | **Microsoft Qlib**, **VectorBT**, QuantConnect Lean | Historical price matrices, cross-sectional factor data |
+| **02 Momentum-Beta** | Momentum & Breakout Scanner | **QuantDinger** (Visual Co-Pilot), **TA-Lib**, Pandas-TA | Intraday price/volume spikes, 20-period highs, RSI |
+| **03 Mean-Reversion** | Oversold Reversals & Wheel Strategy | **Zipline-Reloaded**, Backtrader, yfinance | RSI < 30 oversold bands, Bollinger Bands, Moving Averages |
+| **04 Trend-Surfer** | Macro Trend Follower | **NautilusTrader**, TradingView Lightweight Charts | Multi-timeframe moving average ribbons, trend channels |
+| **05 Arbitrage** | Cross-Exchange & Spatial Arb | **Hummingbot**, **CCXT**, **hftbacktest** | Spot/Futures basis, DEX vs CEX spreads, funding rates |
+| **06 Options-Sniper** | Premium Selling & Iron Condors | **MidasTrader**, QuantConnect Lean, Mibian | Options chains, 30-delta credit spreads, LEAPs |
+| **07 VIX-Watcher** | Volatility Regime Detector | yfinance, Alpha Vantage, CBOE API | ^VIX, ^VXN, VIX futures contango/backwardation |
+| **08 Vol-Surface** | Volatility Surface & Skew Modeler | **PyVolatility**, **Vollib**, Plotly 3D Surface | Implied volatility smiles, term structures, IV rank |
 
 #### EXECUTION SWARM (6 Agents)
 
-| Agent | Role | Tools | Execution |
-|-------|------|-------|-----------|
-| **9. Stock Executor** | US stock/options orders | Alpaca API, IBKR | Market/limit orders |
-| **10. Forex Executor** | 4X currency trades | OANDA, FXCM | Spot/forward contracts |
-| **11. Crypto Executor** | Spot trading, DeFi | Binance, Freqtrade | Swap, stake, LP |
-| **12. Yield Farmer** | DeFi strategies | Yearn, Beefy, Hummingbot | Vault deposits, farming |
-| **13. Polymarket Executor** | Prop bet placement | Polymarket API | Conditional bets |
-| **14. Bond Trader** | Treasury/Corporate bonds | IBKR, QuantConnect | Bond execution |
+| Callsign | Functional Role | Specialized Tools | Execution Routing |
+|:---|:---|:---|:---|
+| **15 Order-Sniper** | Sub-Millisecond Market Orders | **NautilusTrader** (Rust core), **hftbacktest** | Direct Market Access (DMA), Binance, Bybit, IBKR |
+| **16 Size-Calculator** | Fractional Allocation Engine | **Riskfolio-Lib** (Kelly Criterion), NumPy | Dynamic position sizing capped at 5% max per trade |
+| **17 Trail-Manager** | Trailing Stops & Dynamic R/R | **Freqtrade** Trailing Engine, NautilusTrader | Real-time profit locks, dynamic trailing stop orders |
+| **18 Exit-Agent** | Emergency Liquidation & Target Exits | **Alpaca-py**, **ib_insync**, CCXT | Hard profit targets (50% credit), 10% dump-all stops |
+| **09 Greeks-Delta** | Delta-Neutral Hedging | **QuantLib**, QuantConnect Lean | Stock/ETF equity offsets for options delta exposure |
+| **19 Greeks-Gamma** | Gamma Scalping & Acceleration | **QuantLib**, MidasTrader | Intraday dynamic re-hedging as strike is approached |
 
 #### RISK SWARM (6 Agents)
 
-| Agent | Role | Tools | Function |
-|-------|------|-------|----------|
-| **15. Risk Manager** | Position sizing, Kelly Criterion | Custom Python | Calculate position sizes |
-| **16. Portfolio Rebalancer** | Maintain allocation targets | Portfolio API | Rebalance quarterly |
-| **17. Hedge Advisor** | Options hedging, protective puts | QuantConnect | Delta/Gamma hedging |
-| **18. Margin Monitor** | Leverage, margin calls | OANDA, IBKR | Real-time margin |
-| **19. Compliance Agent** | Trading limits, regulations | Custom rules | Enforce limits |
-| **20. Audit Logger** | Immutable ledger | PostgreSQL | Record all trades |
+| Callsign | Functional Role | Specialized Tools | Core Function |
+|:---|:---|:---|:---|
+| **10 Risk-Guardian** | Portfolio Drawdown Enforcer | **Riskfolio-Lib**, Custom Python | 10% hard max drawdown guardrail, auto-halt trigger |
+| **11 News-Breach** | Real-Time Sentiment & Headline Risk | **FinGPT**, NewsAPI, Apify, Finviz | Social sentiment spikes, emergency news halts |
+| **12 Earnings-Radar** | Earnings & Event Volatility | **OpenBB Platform**, SEC EDGAR API, FMP | 10-K/10-Q filing events, earnings blackout periods |
+| **13 Macro-Master** | Macroeconomic & Rates Monitor | **OpenBB Platform**, TradingEconomics, FRED | Fed interest rate announcements, CPI, GDP reports |
+| **14 Sector-Rotator** | Relative Strength & Sector Flow | **Qantify** (GPU AutoML), OpenBB, yfinance | Capital flow shifts between Tech, Energy, Financials |
+| **20 Greeks-Vega** | Volatility Crush & Expansion Risk | **QuantLib**, Vollib | Net portfolio Vega monitoring, earnings crush protection |
 
 ### 10.4 Agent Communication Protocol
 
@@ -1025,23 +1123,53 @@ for (let i = 0; i < 20; i++) {
 | # | Project | GitHub Repo | Stars | Language | License | Best For |
 |---|---------|-------------|-------|----------|---------|----------|
 | 1 | **QuantConnect Lean** | `QuantConnect/Lean` | 10k+ | C#/Python | Apache 2.0 | Institutional-grade multi-asset (stocks, bonds, options, futures) |
-| 2 | **Backtrader** | `mementum/backtrader` | 8k+ | Python | GPL 3.0 | Python-first strategy development, event-driven |
-| 3 | **Zipline** | `quantopian/zipline` | 18k+ | Python | Apache 2.0 | Quantopian-style research, pipeline API |
-| 4 | **Jesse** | `jesse-ai/jesse` | 4k+ | Python | MIT | Crypto-native, simple syntax, backtesting |
-| 5 | **VN.PY** | `vnpy/vnpy` | 6k+ | Python | MIT | Chinese markets, futures, options |
-| 6 | **Hikyuu** | `fasiondog/hikyuu` | 2k+ | C++/Python | MIT | High-performance quant, technical analysis |
+| 2 | **NautilusTrader** | `NautechSystems/nautilus_trader` | 20k+ | Rust/Python | LGPL 3.0 | Institutional-grade event-driven algorithmic trading, IBKR/Binance/Bybit |
+| 3 | **Backtrader** | `mementum/backtrader` | 8k+ | Python | GPL 3.0 | Python-first strategy development, event-driven |
+| 4 | **Zipline** | `quantopian/zipline` | 18k+ | Python | Apache 2.0 | Quantopian-style research, pipeline API |
+| 5 | **Zipline-Reloaded** | `stefan-jansen/zipline-reloaded` | 2k+ | Python | Apache 2.0 | Maintained modern fork of Zipline for research and factor models |
+| 6 | **Jesse** | `jesse-ai/jesse` | 4k+ | Python | MIT | Crypto-native, simple syntax, backtesting |
+| 7 | **VN.PY** | `vnpy/vnpy` | 6k+ | Python | MIT | Chinese markets, futures, options |
+| 8 | **Hikyuu** | `fasiondog/hikyuu` | 2k+ | C++/Python | MIT | High-performance quant, technical analysis |
 
 #### Crypto Trading Systems
 
 | # | Project | GitHub Repo | Stars | Language | License | Best For |
 |---|---------|-------------|-------|----------|---------|----------|
-| 1 | **Freqtrade** | `freqtrade/freqtrade` | 25k+ | Python | GPL 3.0 | Crypto automation, Telegram bot, strategy optimization |
-| 2 | **Hummingbot** | `hummingbot/hummingbot` | 8k+ | Python/Cython | Apache 2.0 | Market making, liquidity mining, arbitrage |
-| 3 | **Jesse** | `jesse-ai/jesse` | 4k+ | Python | MIT | Crypto backtesting, live trading |
-| 4 | **Gekko** | `askmike/gekko` | 10k+ | JavaScript | MIT | Legacy crypto bot (no longer maintained) |
-| 5 | **Zenbot** | `DeviaVir/zenbot` | 8k+ | JavaScript | MIT | Command-line crypto trading |
+| 1 | **Freqtrade** | `freqtrade/freqtrade` | 25k+ | Python | GPL 3.0 | Crypto automation, Telegram bot, strategy hyperopt |
+| 2 | **Hummingbot** | `hummingbot/hummingbot` | 8k+ | Python/Cython | Apache 2.0 | Market making, liquidity mining, cross-exchange arbitrage |
+| 3 | **CCXT** | `ccxt/ccxt` | 35k+ | JS/Py/PHP/C# | MIT | Unified cryptocurrency trading library connecting 100+ exchanges |
+| 4 | **Jesse** | `jesse-ai/jesse` | 4k+ | Python | MIT | Crypto backtesting, live trading |
+| 5 | **Gekko** | `askmike/gekko` | 10k+ | JavaScript | MIT | Legacy crypto bot (historical reference) |
+| 6 | **Zenbot** | `DeviaVir/zenbot` | 8k+ | JavaScript | MIT | Command-line crypto trading |
 
-### 13.2 DeFi Yield Farming Systems
+#### High-Frequency Trading & Microstructure Systems
+
+| # | Project | GitHub Repo | Stars | Language | License | Best For |
+|---|---------|-------------|-------|----------|---------|----------|
+| 1 | **hftbacktest** | `nkaz001/hftbacktest` | 3.7k | Rust/Python | MIT | High-frequency trading, L2/L3 order book simulation, queue position, latency sim |
+| 2 | **NautilusTrader** | `NautechSystems/nautilus_trader` | 20k+ | Rust/Python | LGPL 3.0 | Sub-millisecond event loop, direct market access, same code live & backtest |
+| 3 | **MidasTrader** | `midassystems/midastrader` | — | C++/Python | Apache 2.0 | Interactive Brokers binary tick data, equities & options execution |
+
+### 13.2 AI, Machine Learning & Quantitative Strategy Platforms
+
+| # | Project | GitHub Repo | Stars | Language | License | Best For |
+|---|---------|-------------|-------|----------|---------|----------|
+| 1 | **Microsoft Qlib** | `microsoft/qlib` | 16k+ | Python | MIT | AI-oriented quantitative investment platform, factor mining, ML/DL models |
+| 2 | **FinRL** | `AI4Finance-Foundation/FinRL` | 12k+ | Python | MIT | Deep Reinforcement Learning for trading, multi-agent trading environments |
+| 3 | **FinGPT** | `AI4Finance-Foundation/FinGPT` | 15k+ | Python | MIT | Open-source financial LLMs, news sentiment, SEC filing analysis |
+| 4 | **QuantDinger** | `brokermr810/QuantDinger` | 760+ | Python | AGPL 3.0 | AI trading research platform, LLM strategy co-pilot, visual mini-TradingView charts |
+| 5 | **Qantify** | `Alradyin/qantify` | — | Python/CUDA | MIT | GPU-accelerated quantitative analysis, 160+ indicators, AutoML |
+
+### 13.3 Vectorized Backtesting & Optimization Engines
+
+| # | Project | GitHub Repo | Stars | Language | License | Best For |
+|---|---------|-------------|-------|----------|---------|----------|
+| 1 | **VectorBT** | `polakowo/vectorbt` | 5k+ | Python/Numba | Apache 2.0 | Ultra-fast vectorized backtesting, large parameter grid sweeps |
+| 2 | **Riskfolio-Lib** | `dcajasn/Riskfolio-Lib` | 3.5k | Python | BSD 3-Clause | Quantitative portfolio optimization (Kelly Criterion, CVaR, Black-Litterman) |
+| 3 | **TA-Lib** | `mrjbq7/ta-lib` | 9k+ | Python/C | BSD | Core technical analysis indicators written in C |
+| 4 | **Pandas-TA** | `twopirllc/pandas-ta` | 5k+ | Python | MIT | 150+ technical indicators and utility functions |
+
+### 13.4 DeFi Yield Farming Systems
 
 | # | Project | GitHub Repo | Language | License | Best For |
 |---|---------|-------------|----------|---------|----------|
@@ -1050,7 +1178,7 @@ for (let i = 0; i < 20; i++) {
 | 3 | **Convex Finance** | `convex-eth/platform` | Solidity | MIT | Curve Finance yield booster |
 | 4 | **Alpha Homora** | `AlphaFinanceLab/alpha-homora-v2-contract` | Solidity | MIT | Leveraged yield farming |
 
-### 13.3 Forex/4X Trading Systems
+### 13.5 Forex/4X Trading Systems
 
 | # | Project | GitHub Repo | Language | License | Best For |
 |---|---------|-------------|----------|---------|----------|
@@ -1059,7 +1187,7 @@ for (let i = 0; i < 20; i++) {
 | 3 | **MetaTrader 5 Python** | `MetaQuotes/MetaTrader5` | Python | Proprietary | MT5 integration, forex/CFD |
 | 4 | **Forex-python** | `MicroPyramid/forex-python` | Python | MIT | Currency conversion, rates |
 
-### 13.4 Options Trading & Greeks Calculation
+### 13.6 Options Trading & Greeks Calculation
 
 | # | Project | GitHub Repo | Language | License | Best For |
 |---|---------|-------------|----------|---------|----------|
@@ -1069,7 +1197,7 @@ for (let i = 0; i < 20; i++) {
 | 4 | **PyVolatility** | `optionslab/pyvolatility` | Python | MIT | Volatility surface, Greeks |
 | 5 | **QuantLib** | `lballabio/QuantLib` | C++/Python | BSD | Comprehensive quant library |
 
-### 13.5 Prediction Markets
+### 13.7 Prediction Markets
 
 | # | Project | GitHub Repo | Language | License | Best For |
 |---|---------|-------------|----------|---------|----------|
@@ -1077,53 +1205,61 @@ for (let i = 0; i < 20; i++) {
 | 2 | **Augur** | `AugurProject/augur` | Solidity/TypeScript | MIT | Decentralized prediction market |
 | 3 | **Gnosis Protocol** | `gnosis/gp-v2-contracts` | Solidity | MIT | Batch auctions, prediction markets |
 
-### 13.6 Trading APIs & Brokerage Integrations
+### 13.8 Trading APIs & Brokerage Integrations
 
 | Service | GitHub/API | Type | Fees | Features |
 |---------|------------|------|------|----------|
-| **Alpaca Markets** | `alpacahq/alpaca-trade-api-python` | API + Brokerage | $0 stock trades | Real-time data, paper trading, options |
-| **Interactive Brokers** | `InteractiveBrokers/tws-api` | API + Brokerage | $0.005/share min | Global markets, complex options |
+| **Alpaca Markets** | `alpacahq/alpaca-py` & `alpacahq/alpaca-trade-api-python` | API + Brokerage | $0 stock trades | Real-time data, paper trading, options |
+| **Interactive Brokers** | `erdewit/ib_insync` & `InteractiveBrokers/tws-api` | API + Brokerage | $0.005/share min | Global markets, complex options, async |
 | **TD Ameritrade** | `timkpaine/tdameritrade` | API | $0 trades | ThinkOrSwim API, options chains |
 | **Binance API** | `binance/binance-spot-api-docs` | Exchange API | 0.1% maker/taker | Spot, futures, staking |
 | **Coinbase Pro API** | `brianpursley/coinbase-pro-client` | Exchange API | 0.6% taker | USDC, staking |
 | **OANDA API** | `oanda/v20-python` | Forex API | Spread only | 70+ currency pairs |
+| **OpenBB Platform** | `OpenBB-finance/OpenBB` | Financial Research API | Free / Open Source | Macro, SEC filings, equities, crypto, options |
 
-### 13.7 Data & Analytics Libraries
-
-| # | Project | GitHub Repo | Language | License | Best For |
-|---|---------|-------------|----------|---------|----------|
-| 1 | **yfinance** | `ranaroussi/yfinance` | Python | MIT | Yahoo Finance data, free |
-| 2 | **Alpha Vantage** | `RomelTorres/alpha_vantage` | Python | MIT | Stock/forex/crypto data |
-| 3 | **Pandas-TA** | `twopirllc/pandas-ta` | Python | MIT | Technical analysis indicators |
-| 4 | **TA-Lib** | `mrjbq7/ta-lib` | Python/C | BSD | 150+ technical indicators |
-| 5 | **Finviz** | `lit26/finvizfinance` | Python | MIT | Finviz screener data |
-| 6 | **Quandl** | `quandl/quandl-python` | Python | MIT | Financial/economic data |
-
-### 13.8 Agentic AI Frameworks
+### 13.9 Agentic AI Frameworks
 
 | # | Project | GitHub Repo | Language | License | Best For |
 |---|---------|-------------|----------|---------|----------|
-| 1 | **LangGraph** | `langchain-ai/langgraph` | Python | MIT | Multi-agent orchestration |
-| 2 | **CrewAI** | `crewAIInc/crewAI` | Python | MIT | Pre-built agent roles |
-| 3 | **AutoGen** | `microsoft/autogen` | Python | MIT | Multi-agent conversations |
-| 4 | **Agno** | `agno-agi/agno` | Python | MIT | Lightweight agents |
-| 5 | **Swarm** | `openai/swarm` | Python | MIT | OpenAI-native orchestration |
+| 1 | **LangGraph** | `langchain-ai/langgraph` | Python | MIT | Multi-agent orchestration, stateful workflows |
+| 2 | **CrewAI** | `crewAIInc/crewAI` | Python | MIT | Pre-built agent roles and execution swarms |
+| 3 | **AutoGen** | `microsoft/autogen` | Python | MIT | Multi-agent conversations, code generation |
+| 4 | **Agno** | `agno-agi/agno` | Python | MIT | Lightweight agents and fast API endpoints |
+| 5 | **Swarm** | `openai/swarm` | Python | MIT | Educational OpenAI-native agent patterns |
 
-### 13.9 Complete GitHub Repository URLs
+### 13.10 Complete GitHub Repository URLs
 
 ```bash
-# Multi-Asset Trading
+# Multi-Asset & High-Frequency Trading
 git clone https://github.com/QuantConnect/Lean.git
+git clone https://github.com/NautechSystems/nautilus_trader.git
+git clone https://github.com/nkaz001/hftbacktest.git
+git clone https://github.com/midassystems/midastrader.git
 git clone https://github.com/mementum/backtrader.git
 git clone https://github.com/quantopian/zipline.git
+git clone https://github.com/stefan-jansen/zipline-reloaded.git
 git clone https://github.com/jesse-ai/jesse.git
 git clone https://github.com/vnpy/vnpy.git
 
-# Crypto Trading
+# AI, Machine Learning & Quantitative Strategy Platforms
+git clone https://github.com/microsoft/qlib.git
+git clone https://github.com/AI4Finance-Foundation/FinRL.git
+git clone https://github.com/AI4Finance-Foundation/FinGPT.git
+git clone https://github.com/brokermr810/QuantDinger.git
+git clone https://github.com/Alradyin/qantify.git
+
+# Vectorized Backtesting, Factor Models & Risk Math
+git clone https://github.com/polakowo/vectorbt.git
+git clone https://github.com/dcajasn/Riskfolio-Lib.git
+git clone https://github.com/mrjbq7/ta-lib.git
+git clone https://github.com/twopirllc/pandas-ta.git
+
+# Crypto & DeFi Trading
 git clone https://github.com/freqtrade/freqtrade.git
 git clone https://github.com/hummingbot/hummingbot.git
+git clone https://github.com/ccxt/ccxt.git
 
-# DeFi Yield Farming
+# Yield Farming
 git clone https://github.com/yearn/yearn-vaults-v3.git
 git clone https://github.com/beefyfinance/beefy-contracts.git
 
@@ -1141,15 +1277,16 @@ git clone https://github.com/lballabio/QuantLib.git
 git clone https://github.com/Polymarket/clob-client.git
 git clone https://github.com/AugurProject/augur.git
 
-# Trading APIs
+# Trading APIs & Broker Connectors
+git clone https://github.com/alpacahq/alpaca-py.git
 git clone https://github.com/alpacahq/alpaca-trade-api-python.git
+git clone https://github.com/erdewit/ib_insync.git
 git clone https://github.com/timkpaine/tdameritrade.git
 
-# Data & Analytics
+# Data & Research
+git clone https://github.com/OpenBB-finance/OpenBB.git
 git clone https://github.com/ranaroussi/yfinance.git
 git clone https://github.com/RomelTorres/alpha_vantage.git
-git clone https://github.com/twopirllc/pandas-ta.git
-git clone https://github.com/mrjbq7/ta-lib.git
 
 # Agentic AI
 git clone https://github.com/langchain-ai/langgraph.git
@@ -1157,17 +1294,22 @@ git clone https://github.com/crewAIInc/crewAI.git
 git clone https://github.com/microsoft/autogen.git
 ```
 
-### 13.10 Recommended System Combinations
+### 13.11 Recommended System Combinations
 
-| Use Case | Primary System | Secondary System | API Provider |
-|----------|----------------|------------------|--------------|
-| **Stocks + Options** | QuantConnect Lean | Backtrader | Alpaca, IBKR |
-| **Crypto Trading** | Freqtrade | Hummingbot | Binance, Coinbase |
-| **Yield Farming** | Yearn SDK | Beefy SDK | On-chain |
-| **Forex/4X** | OANDA v20 | FXCM API | OANDA, FXCM |
-| **Prop Bets** | Polymarket CLOB | Custom Rust | Polymarket |
-| **Options Greeks** | QuantLib | Mibian | CBOE, Alpaca |
-| **Agent Orchestration** | LangGraph | CrewAI | Local LLMs |
+| Use Case | Primary System | Secondary System | API / Data Provider |
+|----------|----------------|------------------|---------------------|
+| **Institutional Multi-Asset** | NautilusTrader | QuantConnect Lean | Alpaca, IBKR, Schwab |
+| **High-Frequency & Grid** | hftbacktest | NautilusTrader | Binance Futures, Bybit |
+| **AI Strategy Co-Pilot** | QuantDinger | FinGPT | OpenBB, TradingView |
+| **Crypto Automation** | Freqtrade | Hummingbot / CCXT | Binance, Coinbase, Kraken |
+| **Machine Learning Alphas** | Microsoft Qlib | FinRL | OpenBB, Alpha Vantage |
+| **Vectorized Backtests** | VectorBT | Zipline-Reloaded | Yahoo Finance, yfinance |
+| **Portfolio Risk & Kelly Sizing** | Riskfolio-Lib | Custom Python | Real-time Broker Feeds |
+| **Yield Farming** | Yearn SDK | Beefy SDK | On-chain (Ethereum, Arbitrum, Base) |
+| **Forex / Currency Trading** | OANDA v20 | NautilusTrader | OANDA, FXCM, IBKR |
+| **Prediction Markets / Prop Bets** | Polymarket CLOB | Custom Rust Module | Polymarket API |
+| **Options Greeks & Vol Surfaces** | QuantLib / MidasTrader | Mibian / Vollib | CBOE, Alpaca, IBKR |
+| **Agent Orchestration** | LangGraph | CrewAI | Local Ollama (Qwen, DeepSeek, GLM) |
 
 ---
 

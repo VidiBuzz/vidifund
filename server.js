@@ -5,6 +5,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3030;
 
+// Analytics routes (indicators, options, risk) backed by src/lib
+const { registerAnalyticsRoutes } = require('./src/routes/analytics');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -486,9 +489,23 @@ app.post('/api/simulate', async (req, res) => {
     }
 });
 
+// Analytics routes (indicators / options / risk) must be registered before
+// the catch-all below, otherwise the SPA handler swallows them.
+registerAnalyticsRoutes(app, pool);
+
 // Serve frontend for all non-API routes
-app.get('*', (req, res) => {
+// v2 is the default interface; the v1 monolith stays available at /v1 for
+// comparison until the redesign is signed off.
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src', 'ui', 'index.html'));
+});
+
+app.get('/v1', (req, res) => {
     res.sendFile(path.join(__dirname, 'FortunaTrade-unified.html'));
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src', 'ui', 'index.html'));
 });
 
 // Start server

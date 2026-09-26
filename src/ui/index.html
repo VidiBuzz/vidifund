@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FortunaTrade — Command Center</title>
+<meta name="description" content="Multi-asset trading command center: equities, options, crypto, forex and prediction markets with a 20-agent risk and execution layer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="src/ui/theme.css">
+<!-- Only one charting library, deferred. v1 shipped Chart.js + Lightweight Charts
+     + Plotly + Three.js on every load (~1.2 MB) to render two charts. -->
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js" defer></script>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ══════════════════════════ Sidebar ══════════════════════════ -->
+  <nav class="nav" id="nav" aria-label="Primary">
+    <div class="nav__brand">
+      <div class="nav__logo" aria-hidden="true">FT</div>
+      <div class="nav__title">Fortuna<span>Trade</span></div>
+    </div>
+
+    <div class="nav__section">Trading</div>
+    <button class="nav__item" data-view="dashboard" aria-current="page">
+      <span class="nav__icon" aria-hidden="true">◧</span> Command Center
+    </button>
+    <button class="nav__item" data-view="markets">
+      <span class="nav__icon" aria-hidden="true">◈</span> Markets
+      <span class="nav__badge" id="badge-markets">—</span>
+    </button>
+    <button class="nav__item" data-view="portfolio">
+      <span class="nav__icon" aria-hidden="true">▦</span> Portfolio
+    </button>
+    <button class="nav__item" data-view="orders">
+      <span class="nav__icon" aria-hidden="true">⇅</span> Orders
+      <span class="nav__badge" id="badge-orders">0</span>
+    </button>
+    <button class="nav__item" data-view="screener">
+      <span class="nav__icon" aria-hidden="true">⌕</span> Screener
+    </button>
+
+    <div class="nav__section">Intelligence</div>
+    <button class="nav__item" data-view="agents">
+      <span class="nav__icon" aria-hidden="true">◉</span> Agent Swarm
+      <span class="nav__badge" id="badge-agents">20</span>
+    </button>
+    <button class="nav__item" data-view="options">
+      <span class="nav__icon" aria-hidden="true">◇</span> Options Lab
+    </button>
+    <button class="nav__item" data-view="risk">
+      <span class="nav__icon" aria-hidden="true">⚠</span> Risk Engine
+    </button>
+
+    <div class="nav__section">System</div>
+    <button class="nav__item" data-view="architecture">
+      <span class="nav__icon" aria-hidden="true">⬡</span> Architecture
+    </button>
+    <button class="nav__item" data-view="data">
+      <span class="nav__icon" aria-hidden="true">⛁</span> Data Sources
+    </button>
+
+    <div class="nav__footer">
+      <div class="nav__stat"><span>Latency</span><b id="stat-latency">—</b></div>
+      <div class="nav__stat"><span>Feed</span><b id="stat-feed" class="up">Live</b></div>
+      <div class="nav__stat" style="margin-top:8px"><span>Engine</span><b>Paper</b></div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════ Topbar ══════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="btn btn--ghost btn--sm hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <span aria-hidden="true">☰</span>
+      </button>
+      <h1 class="topbar__page" id="page-title">Command Center</h1>
+      <span class="regime" id="vix-regime" data-regime="normal" title="CBOE Volatility Index regime">
+        <span class="regime__dot" aria-hidden="true"></span>
+        <span>VIX <span id="vix-value">—</span> <span id="vix-label">LOADING</span></span>
+      </span>
+    </div>
+    <div class="topbar__right">
+      <span class="badge badge--outline" id="market-session">—</span>
+      <time class="topbar__clock" id="clock">--:--:--</time>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════ Ticker ══════════════════════════ -->
+  <div class="ticker" aria-label="Live market ticker">
+    <div class="ticker__track" id="ticker-track"></div>
+  </div>
+
+  <!-- ══════════════════════════ Main ══════════════════════════ -->
+  <main class="main" id="main">
+    <div class="main__inner">
+
+      <!-- ──── DASHBOARD ──── -->
+      <section class="view" data-view="dashboard">
+        <div class="grid grid--4 mb-4" id="stat-tiles"></div>
+
+        <div class="grid grid--2-1 mb-4">
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Portfolio Performance</span>
+              <div class="row" style="gap:12px">
+                <span class="card__hint" id="equity-source">illustrative</span>
+                <div class="seg" role="group" aria-label="Timeframe">
+                  <button class="seg__btn" data-tf="1D">1D</button>
+                  <button class="seg__btn" data-tf="1W">1W</button>
+                  <button class="seg__btn" data-tf="1M" aria-pressed="true">1M</button>
+                  <button class="seg__btn" data-tf="3M">3M</button>
+                  <button class="seg__btn" data-tf="1Y">1Y</button>
+                  <button class="seg__btn" data-tf="ALL">ALL</button>
+                </div>
+              </div>
+            </div>
+            <div class="card__body">
+              <div class="chart chart--md" id="chart-equity"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Risk Posture</span>
+              <span class="card__hint" id="risk-verdict">—</span>
+            </div>
+            <div class="card__body stack" id="risk-meters"></div>
+          </div>
+        </div>
+
+        <div class="grid grid--1-2 mb-4">
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Pending Approvals</span>
+              <span class="badge badge--warn" id="approval-count">0</span>
+            </div>
+            <div class="card__body" id="approval-queue">
+              <div class="empty">
+                <div class="empty__icon" aria-hidden="true">✓</div>
+                <div class="empty__title">Queue clear</div>
+                <div class="empty__text">No trades awaiting approval.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Open Positions</span>
+              <button class="btn btn--primary btn--sm" id="btn-new-order">+ New Order</button>
+            </div>
+            <div class="card__body card__body--flush">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th><th class="num">Qty</th><th class="num">Avg Cost</th>
+                      <th class="num">Last</th><th class="num">Mkt Value</th>
+                      <th class="num">P&amp;L</th><th class="num">P&amp;L %</th><th>Weight</th>
+                    </tr>
+                  </thead>
+                  <tbody id="positions-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Agent Swarm Activity</span>
+              <button class="btn btn--ghost btn--sm" data-goto="agents">View all →</button>
+            </div>
+            <div class="card__body">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Agent</th><th>Role</th><th>Status</th><th class="num">Latency</th></tr></thead>
+                  <tbody id="agents-preview"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="card__title">Top Movers</span>
+              <button class="btn btn--ghost btn--sm" data-goto="markets">All markets →</button>
+            </div>
+            <div class="card__body">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Symbol</th><th class="num">Last</th><th class="num">Change</th><th class="num">Volume</th></tr></thead>
+                  <tbody id="movers-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Additional views rendered by app.js -->
+      <section class="view" data-view="markets" hidden></section>
+      <section class="view" data-view="portfolio" hidden></section>
+      <section class="view" data-view="orders" hidden></section>
+      <section class="view" data-view="screener" hidden></section>
+      <section class="view" data-view="agents" hidden></section>
+      <section class="view" data-view="options" hidden></section>
+      <section class="view" data-view="risk" hidden></section>
+      <section class="view" data-view="architecture" hidden></section>
+      <section class="view" data-view="data" hidden></section>
+
+    </div>
+  </main>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<script src="src/ui/app.js"></script>
+</body>
+</html>

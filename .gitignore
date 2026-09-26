@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Caches
+.cache/
+.cache/*
+*.log
+npm-debug.log*
+
+# Test & verification artefacts
+test-results/
+playwright-report/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Research output (regenerable; large)
+research/results/
+*.parquet
+*.duckdb
+
+# Scraped documentation snapshots (reference material, not source)
+railway_domains*.html
+railyway_docs.html

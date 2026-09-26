@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FortunaTrade AI Trading System | Upgrade Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-purple: #7000ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff88;
+            --neon-red: #ff4b4b;
+            --neon-yellow: #fbbf24;
+            --deep-bg: #0a0a12;
+            --card-bg: #12121c;
+            --card-border: #1e1e2e;
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 60%),
+                linear-gradient(180deg, #0a0a12 0%, #0d0d18 50%, #0a0a12 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* 3D Card Effect */
+        .card-3d {
+            background: linear-gradient(145deg, #16162a 0%, #0f0f1a 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 16px;
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(0, 242, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-8px) rotateX(2deg);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(0, 242, 255, 0.15),
+                0 0 100px rgba(112, 0, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        /* Gradient Borders */
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(145deg, #16162a 0%, #0f0f1a 100%);
+            border-radius: 16px;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.5), rgba(112, 0, 255, 0.5), rgba(0, 255, 136, 0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        /* Glowing Elements */
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3), 0 0 40px rgba(0, 242, 255, 0.1);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(112, 0, 255, 0.3), 0 0 40px rgba(112, 0, 255, 0.1);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+        }
+
+        /* Glass with depth */
+        .glass-3d {
+            background: linear-gradient(145deg, rgba(22, 22, 42, 0.9) 0%, rgba(15, 15, 26, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* Clickable Links */
+        .repo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1) 0%, rgba(112, 0, 255, 0.1) 100%);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px;
+            color: #00f2ff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .repo-link:hover {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.2) 0%, rgba(112, 0, 255, 0.2) 100%);
+            border-color: rgba(0, 242, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Stat Boxes */
+        .stat-box {
+            background: linear-gradient(145deg, #1a1a2e 0%, #12121c 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.03) 50%, transparent 60%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        /* Tag Pills */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-cyan {
+            background: rgba(0, 242, 255, 0.15);
+            color: #00f2ff;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+        }
+
+        .tag-purple {
+            background: rgba(112, 0, 255, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(112, 0, 255, 0.3);
+        }
+
+        .tag-green {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .tag-red {
+            background: rgba(255, 75, 75, 0.15);
+            color: #ff4b4b;
+            border: 1px solid rgba(255, 75, 75, 0.3);
+        }
+
+        .tag-yellow {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 242, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Text colors - ensuring contrast */
+        .text-light {
+            color: #e2e8f0;
+        }
+
+        .text-muted {
+            color: #94a3b8;
+        }
+
+        .text-dim {
+            color: #64748b;
+        }
+
+        /* Dark text on light elements */
+        .light-card {
+            background: linear-gradient(145deg, #1e1e32 0%, #16162a 100%);
+            border: 1px solid #3a3a5a;
+        }
+    </style>
+</head>
+
+<body class="text-light">
+    <!-- Floating Particles Background -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s; background: rgba(112, 0, 255, 0.3);"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 6s; background: rgba(0, 255, 136, 0.3);"></div>
+        <div class="particle" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 10s; background: rgba(112, 0, 255, 0.3);"></div>
+        <div class="particle" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 14s; background: rgba(0, 255, 136, 0.3);"></div>
+        <div class="particle" style="left: 90%; animation-delay: 16s;"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="inline-flex items-center gap-3 mb-4">
+                <div class="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="font-bold text-3xl mono tracking-wider">
+                    <span class="text-cyan-400"
+                        style="text-shadow: 0 0 30px rgba(0, 242, 255, 0.5);">FORTUNA</span><span
+                        class="text-white">TRADE</span>
+                </span>
+            </div>
+            <h1 class="text-5xl font-bold text-white mb-3" style="text-shadow: 0 0 40px rgba(0, 242, 255, 0.3);">AI
+                Trading System</h1>
+            <p class="text-xl text-muted">Complete Upgrade Plan with 20-Agent Swarm Architecture</p>
+        </header>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-4 gap-4 mb-10">
+            <div class="stat-box p-5 glow-cyan">
+                <div class="text-dim text-xs mb-1 uppercase tracking-wider">Systems</div>
+                <div class="text-4xl font-bold text-cyan-400 mono">10+</div>
+            </div>
+            <div class="stat-box p-5 glow-purple">
+                <div class="text-dim text-xs mb-1 uppercase tracking-wider">Agents</div>
+                <div class="text-4xl font-bold text-purple-400 mono">20</div>
+            </div>
+            <div class="stat-box p-5 glow-green">
+                <div class="text-dim text-xs mb-1 uppercase tracking-wider">Target/Month</div>
+                <div class="text-4xl font-bold text-green-400 mono">300%</div>
+            </div>
+            <div class="stat-box p-5" style="border-color: rgba(255, 75, 75, 0.3);">
+                <div class="text-dim text-xs mb-1 uppercase tracking-wider">Max Loss</div>
+                <div class="text-4xl font-bold text-red-400 mono">10%</div>
+            </div>
+        </div>
+
+        <!-- HERO IMAGE: AI TRADING DASHBOARD -->
+        <section class="gradient-border mb-12 p-1">
+            <div class="card-3d p-0 overflow-hidden relative" style="height: 400px;">
+                <img referrerpolicy="no-referrer" src="https://cdn.vidi.news/fortuna_trade_ai_trading_system.png" alt="FortunaTrade AI Trading System"
+                    class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-1000 ease-out" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-[#0a0a12] via-transparent to-transparent pointer-events-none">
+                </div>
+                <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                    <div>
+                        <span class="tag tag-cyan shadow-[0_0_15px_rgba(0,242,255,0.4)] backdrop-blur-md">AUTONOMOUS
+                            ORCHESTRATION</span>
+                        <h2 class="text-3xl font-bold text-white mt-2" style="text-shadow: 0 4px 10px rgba(0,0,0,0.8);">
+                            High-Frequency Generative Inference</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM 1: NautilusTrader -->
+        <section class="gradient-border mb-6 p-1">
+            <div class="card-3d p-6">
+                <div class="flex items-start gap-5">
+                    <div class="text-5xl" style="filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));">🚀</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white">NautilusTrader</h3>
+                            <span class="tag tag-green">🏆 RECOMMENDED</span>
+                            <span class="tag tag-cyan mono">20.4k ⭐</span>
+                        </div>
+                        <p class="text-muted text-base mb-4 leading-relaxed">
+                            <strong class="text-white">The gold standard</strong> for institutional-grade algorithmic
+                            trading. Built in Rust for blazing-fast performance with Python bindings.
+                            Same code works for both backtesting AND live trading - no reimplementation needed. Supports
+                            stocks, crypto, forex, futures, and options
+                            across 15+ exchanges including Binance, Bybit, Interactive Brokers, and Kraken.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag tag-purple">Rust Core</span>
+                            <span class="tag tag-cyan">Event-driven</span>
+                            <span class="tag tag-cyan">Multi-asset</span>
+                            <span class="tag tag-green">IBKR</span>
+                        </div>
+                        <a href="https://github.com/NautechSystems/nautilus_trader" target="_blank" class="repo-link">
+                            <i class="fab fa-github"></i>
+                            <span>View on GitHub</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM 2: hftbacktest -->
+        <section class="gradient-border mb-6 p-1">
+            <div class="card-3d p-6">
+                <div class="flex items-start gap-5">
+                    <div class="text-5xl" style="filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.5));">⚡</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white">hftbacktest</h3>
+                            <span class="tag tag-cyan mono">3.7k ⭐</span>
+                        </div>
+                        <p class="text-muted text-base mb-4 leading-relaxed">
+                            <strong class="text-white">High-frequency trading powerhouse</strong> built in Rust +
+                            Python. The ONLY open source system that accurately simulates
+                            order queue positions and feed/order latencies. Uses full tick data with Level-2 and Level-3
+                            order book reconstruction.
+                            Perfect for market making and grid trading on Binance Futures and Bybit.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag tag-red">HFT Specialist</span>
+                            <span class="tag tag-yellow">Order Book Sim</span>
+                            <span class="tag tag-purple">Rust + Python</span>
+                            <span class="tag tag-green">Live Trading</span>
+                        </div>
+                        <a href="https://github.com/nkaz001/hftbacktest" target="_blank" class="repo-link">
+                            <i class="fab fa-github"></i>
+                            <span>View on GitHub</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM 3: QuantDinger -->
+        <section class="gradient-border mb-6 p-1">
+            <div class="card-3d p-6">
+                <div class="flex items-start gap-5">
+                    <div class="text-5xl" style="filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5));">🤖</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white">QuantDinger</h3>
+                            <span class="tag tag-purple mono">767 ⭐</span>
+                        </div>
+                        <p class="text-muted text-base mb-4 leading-relaxed">
+                            <strong class="text-white">AI-powered research platform</strong> with built-in LLM co-pilot
+                            that generates trading strategies from ideas.
+                            Features visual "Mini-TradingView" charts for drag-drop indicator analysis. Write strategies
+                            in pure Python with AI assistance.
+                            Docker deployment with PostgreSQL. Connects to 30+ exchanges.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag tag-red">AI Co-Pilot</span>
+                            <span class="tag tag-cyan">Visual Charts</span>
+                            <span class="tag tag-cyan">Docker</span>
+                            <span class="tag tag-purple">30+ Exchanges</span>
+                        </div>
+                        <a href="https://github.com/brokermr810/QuantDinger" target="_blank" class="repo-link">
+                            <i class="fab fa-github"></i>
+                            <span>View on GitHub</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM 4: Freqtrade -->
+        <section class="gradient-border mb-6 p-1">
+            <div class="card-3d p-6">
+                <div class="flex items-start gap-5">
+                    <div class="text-5xl" style="filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.5));">₿</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white">Freqtrade</h3>
+                            <span class="tag tag-yellow mono">25k+ ⭐</span>
+                        </div>
+                        <p class="text-muted text-base mb-4 leading-relaxed">
+                            <strong class="text-white">The most popular crypto bot</strong> with battle-tested
+                            reliability. Features ML-based hyperparameter optimization
+                            to automatically find best strategy parameters. Control via Telegram or WebUI. Download
+                            historical data directly from exchanges.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag tag-yellow">ML Optimization</span>
+                            <span class="tag tag-green">Telegram</span>
+                            <span class="tag tag-cyan">WebUI</span>
+                            <span class="tag tag-purple">Proven</span>
+                        </div>
+                        <a href="https://github.com/freqtrade/freqtrade" target="_blank" class="repo-link">
+                            <i class="fab fa-github"></i>
+                            <span>View on GitHub</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Systems -->
+        <section class="card-3d p-6 mb-6">
+            <h3 class="text-xl font-bold text-white mb-4">Additional Systems</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="light-card p-4 rounded-xl">
+                    <div class="font-bold text-white mb-1">Qantify</div>
+                    <div class="text-sm text-muted mb-2">GPU-accelerated, 160+ indicators, ML/AutoML</div>
+                    <a href="https://github.com/Alradyin/qantify" target="_blank"
+                        class="text-cyan-400 text-sm hover:underline">
+                        <i class="fab fa-github mr-1"></i>github.com/Alradyin/qantify
+                    </a>
+                </div>
+                <div class="light-card p-4 rounded-xl">
+                    <div class="font-bold text-white mb-1">MidasTrader</div>
+                    <div class="text-sm text-muted mb-2">IBKR broker, binary data, stock/options</div>
+                    <a href="https://github.com/midassystems/midastrader" target="_blank"
+                        class="text-cyan-400 text-sm hover:underline">
+                        <i class="fab fa-github mr-1"></i>github.com/midassystems
+                    </a>
+                </div>
+                <div class="light-card p-4 rounded-xl">
+                    <div class="font-bold text-white mb-1">Zipline-Reloaded</div>
+                    <div class="text-sm text-muted mb-2">Academic research, factor models</div>
+                    <a href="https://github.com/stefan-jansen/zipline-reloaded" target="_blank"
+                        class="text-cyan-400 text-sm hover:underline">
+                        <i class="fab fa-github mr-1"></i>github.com/stefan-jansen
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 20 Agents Grid -->
+        <section class="card-3d p-6 mb-6">
+            <h3 class="text-xl font-bold text-white mb-4">20-Agent Trading Swarm</h3>
+            <div class="grid grid-cols-5 gap-3">
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">01</div>
+                    <div class="text-white text-sm">Alpha-Hunter</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">02</div>
+                    <div class="text-white text-sm">Momentum-Beta</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">03</div>
+                    <div class="text-white text-sm">Mean-Reversion</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">04</div>
+                    <div class="text-white text-sm">Trend-Surfer</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">05</div>
+                    <div class="text-white text-sm">Arbitrage</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2);">
+                    <div class="text-cyan-400 font-bold text-lg mono">06</div>
+                    <div class="text-white text-sm">Options-Sniper</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(255, 75, 75, 0.1); border: 1px solid rgba(255, 75, 75, 0.2);">
+                    <div class="text-red-400 font-bold text-lg mono">07</div>
+                    <div class="text-white text-sm">VIX-Watcher</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(255, 75, 75, 0.1); border: 1px solid rgba(255, 75, 75, 0.2);">
+                    <div class="text-red-400 font-bold text-lg mono">08</div>
+                    <div class="text-white text-sm">Vol-Surface</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(255, 75, 75, 0.1); border: 1px solid rgba(255, 75, 75, 0.2);">
+                    <div class="text-red-400 font-bold text-lg mono">09</div>
+                    <div class="text-white text-sm">Greeks-Delta</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(255, 75, 75, 0.1); border: 1px solid rgba(255, 75, 75, 0.2);">
+                    <div class="text-red-400 font-bold text-lg mono">10</div>
+                    <div class="text-white text-sm">Risk-Guardian</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);">
+                    <div class="text-yellow-400 font-bold text-lg mono">11</div>
+                    <div class="text-white text-sm">News-Breach</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba251, 191, 36, 0.2);">
+                    <div class="text-yellow-400 font-bold text-lg mono">12</div>
+                    <div class="text-white text-sm">Earnings-Radar</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);">
+                    <div class="text-yellow-400 font-bold text-lg mono">13</div>
+                    <div class="text-white text-sm">Macro-Master</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);">
+                    <div class="text-yellow-400 font-bold text-lg mono">14</div>
+                    <div class="text-white text-sm">Sector-Rotator</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2);">
+                    <div class="text-green-400 font-bold text-lg mono">15</div>
+                    <div class="text-white text-sm">Order-Sniper</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2);">
+                    <div class="text-green-400 font-bold text-lg mono">16</div>
+                    <div class="text-white text-sm">Size-Calculator</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2);">
+                    <div class="text-green-400 font-bold text-lg mono">17</div>
+                    <div class="text-white text-sm">Trail-Manager</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.2);">
+                    <div class="text-green-400 font-bold text-lg mono">18</div>
+                    <div class="text-white text-sm">Exit-Agent</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(112, 0, 255, 0.1); border: 1px solid rgba(112, 0, 255, 0.2);">
+                    <div class="text-purple-400 font-bold text-lg mono">19</div>
+                    <div class="text-white text-sm">Greeks-Gamma</div>
+                </div>
+                <div class="text-center p-3 rounded-lg"
+                    style="background: rgba(112, 0, 255, 0.1); border: 1px solid rgba(112, 0, 255, 0.2);">
+                    <div class="text-purple-400 font-bold text-lg mono">20</div>
+                    <div class="text-white text-sm">Greeks-Vega</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Strategies -->
+        <section class="card-3d p-6 mb-6">
+            <h3 class="text-xl font-bold text-white mb-4">Trading Strategies</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="light-card p-5 rounded-xl" style="border-left: 4px solid #ff4b4b;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-lg font-bold text-white">Aggressive Momentum</h4>
+                        <span class="tag tag-red">HIGH RISK</span>
+                    </div>
+                    <div class="text-green-400 font-bold text-xl mb-2">Target: 5-10% Daily</div>
+                    <ul class="text-sm text-muted space-y-1">
+                        <li>✓ Price breaks 20-period high + volume</li>
+                        <li>✓ RSI crossing above 60</li>
+                        <li>✓ VIX below 20 required</li>
+                        <li>✗ 10% hard stop enforced</li>
+                    </ul>
+                </div>
+                <div class="light-card p-5 rounded-xl" style="border-left: 4px solid #fbbf24;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-lg font-bold text-white">Options Iron Condor</h4>
+                        <span class="tag tag-yellow">MEDIUM</span>
+                    </div>
+                    <div class="text-green-400 font-bold text-xl mb-2">Target: 2-5% Weekly</div>
+                    <ul class="text-sm text-muted space-y-1">
+                        <li>✓ Sell 30-delta, buy 10-delta wings</li>
+                        <li>✓ 30-45 day expiration</li>
+                        <li>✓ Take profit at 50% credit</li>
+                        <li>✓ Max loss: 2x credit</li>
+                    </ul>
+                </div>
+                <div class="light-card p-5 rounded-xl" style="border-left: 4px solid #00ff88;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-lg font-bold text-white">HFT Grid Crypto</h4>
+                        <span class="tag tag-green">LOW RISK</span>
+                    </div>
+                    <div class="text-green-400 font-bold text-xl mb-2">Target: 1-3% Daily</div>
+                    <ul class="text-sm text-muted space-y-1">
+                        <li>✓ Using hftbacktest</li>
+                        <li>✓ Capture spread + rebates</li>
+                        <li>✓ BTC, ETH, SOL focus</li>
+                        <li>✓ Latency: &lt;10ms</li>
+                    </ul>
+                </div>
+                <div class="light-card p-5 rounded-xl" style="border-left: 4px solid #fbbf24;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-lg font-bold text-white">Mean Reversion</h4>
+                        <span class="tag tag-yellow">MEDIUM</span>
+                    </div>
+                    <div class="text-green-400 font-bold text-xl mb-2">Target: 10-20% Monthly</div>
+                    <ul class="text-sm text-muted space-y-1">
+                        <li>✓ RSI &lt; 30 oversold</li>
+                        <li>✓ Wheel strategy</li>
+                        <li>✓ LEAP calls for leverage</li>
+                        <li>✓ Exit at RSI &gt; 70</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Risk Management -->
+        <section class="card-3d p-6 mb-6">
+            <h3 class="text-xl font-bold text-white mb-4">Risk Management</h3>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-lg font-bold text-red-400 mb-3">Hard Rules</h4>
+                    <ul class="space-y-2 text-light">
+                        <li class="flex items-center gap-2"><i class="fas fa-ban text-red-400"></i> Max position:
+                            <strong class="text-white">5%</strong>
+                        </li>
+                        <li class="flex items-center gap-2"><i class="fas fa-ban text-red-400"></i> Max sector: <strong
+                                class="text-white">25%</strong></li>
+                        <li class="flex items-center gap-2"><i class="fas fa-ban text-red-400"></i> Max drawdown:
+                            <strong class="text-red-400">10% → DUMP ALL</strong>
+                        </li>
+                        <li class="flex items-center gap-2"><i class="fas fa-ban text-red-400"></i> Min R/R: <strong
+                                class="text-white">1:2</strong></li>
+                        <li class="flex items-center gap-2"><i class="fas fa-ban text-red-400"></i> Max leverage:
+                            <strong class="text-white">3x</strong>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-yellow-400 mb-3">Kelly Criterion</h4>
+                    <div class="light-card p-4 rounded-xl font-mono text-sm">
+                        <div class="text-cyan-400 mb-2">f* = (bp - q) / b</div>
+                        <div class="text-muted text-xs mb-2">f* = fraction | b = odds | p = win probability</div>
+                        <div class="text-green-400">Example: 60% win, 2:1 = <strong class="text-white">40%</strong>
+                        </div>
+                        <div class="text-red-400 text-xs mt-2">CAPPED AT 5% PER TRADE</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Table -->
+        <section class="card-3d p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Expected Performance</h3>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="border-bottom: 1px solid #2a2a4a;">
+                        <th class="text-left py-3 px-4 text-muted">Strategy</th>
+                        <th class="text-right py-3 px-4 text-muted">Monthly</th>
+                        <th class="text-right py-3 px-4 text-muted">Max DD</th>
+                        <th class="text-right py-3 px-4 text-muted">Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #1e1e2e;">
+                        <td class="py-3 px-4 text-light">HFT Grid Crypto</td>
+                        <td class="text-right py-3 px-4 text-green-400 mono">5-15%</td>
+                        <td class="text-right py-3 px-4 text-muted mono">5%</td>
+                        <td class="text-right py-3 px-4"><span class="tag tag-green">LOW</span></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1e1e2e;">
+                        <td class="py-3 px-4 text-light">Iron Condor</td>
+                        <td class="text-right py-3 px-4 text-green-400 mono">3-8%</td>
+                        <td class="text-right py-3 px-4 text-muted mono">10%</td>
+                        <td class="text-right py-3 px-4"><span class="tag tag-yellow">MEDIUM</span></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1e1e2e;">
+                        <td class="py-3 px-4 text-light">Momentum</td>
+                        <td class="text-right py-3 px-4 text-green-400 mono">10-30%</td>
+                        <td class="text-right py-3 px-4 text-muted mono">15%</td>
+                        <td class="text-right py-3 px-4"><span class="tag tag-red">HIGH</span></td>
+                    </tr>
+                    <tr style="background: rgba(0, 255, 136, 0.1);">
+                        <td class="py-3 px-4 font-bold text-white">COMPOUNDED (3x)</td>
+                        <td class="text-right py-3 px-4 text-green-400 mono font-bold">150-300%</td>
+                        <td class="text-right py-3 px-4 text-red-400 mono font-bold">10% MAX</td>
+                        <td class="text-right py-3 px-4"><span class="tag tag-red">CONTROLLED</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer class="mt-10 text-center text-dim text-sm">
+            <p>Generated: February 2026 | FortunaTrade AI Trading System Plan</p>
+            <p class="mt-2">
+                <a href="https://vidismart.com" class="text-cyan-400 hover:underline">← Back to VidiSmart</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // GSAP Animations on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate header
+            gsap.from('header', { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' });
+
+            // Animate stats
+            gsap.from('.stat-box', {
+                opacity: 0,
+                y: 30,
+                stagger: 0.1,
+                duration: 0.6,
+                ease: 'back.out(1.7)'
+            });
+
+            // Animate cards
+            gsap.from('.gradient-border', {
+                opacity: 0,
+                y: 40,
+                stagger: 0.15,
+                duration: 0.7,
+                ease: 'power2.out',
+                delay: 0.3
+            });
+
+            // Animate 3D hover effects
+            document.querySelectorAll('.card-3d').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, { scale: 1.02, duration: 0.3, ease: 'power2.out' });
+                });
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, { scale: 1, duration: 0.3, ease: 'power2.out' });
+                });
+            });
+
+            // Floating particles random delays
+            document.querySelectorAll('.particle').forEach(p => {
+                p.style.animationDelay = Math.random() * 20 + 's';
+            });
+        });
+    </script>
+</body>
+
+</html>
