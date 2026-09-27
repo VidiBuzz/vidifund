@@ -39,3 +39,13 @@ research/results/
 # Scraped documentation snapshots (reference material, not source)
 railway_domains*.html
 railyway_docs.html
+
+# AppFlowy Cloud credentials and scratch output (tools/)
+tools/.appflowy_token
+tools/.admin_token.txt
+tools/*.txt
+!tools/af-core.mjs
+!tools/af-markdown.mjs
+!tools/af-import.mjs
+!tools/af-verify.mjs
+
